@@ -127,6 +127,14 @@ export function Payment() {
       await submitVideo(tgId, stagedVideoId);
 
       setDone(true);
+
+      // Close Telegram Mini App after successful end-to-end flow.
+      const closeTarget = getWebApp();
+      if (closeTarget?.close) {
+        setTimeout(() => {
+          closeTarget.close();
+        }, 1200);
+      }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong. Try again.";
