@@ -69,10 +69,27 @@ export function Payment() {
 
       // 1) Create invoice (Stars) and open invoice UI in Telegram.
       const payment = await initiatePayment(tgId);
+      const invoiceLink = String(payment.invoice_link || "").trim();
 
       const webapp = getWebApp();
       if (!webapp?.openInvoice) {
         setError("Telegram invoice UI is not available.");
+        return;
+      }
+      if (!invoiceLink) {
+        setError("Invoice link is missing. Please try again.");
+        return;
+      }
+
+      // Validate URL shape early to avoid Telegram SDK pattern errors.
+      try {
+        const parsed = new URL(invoiceLink);
+        if (parsed.protocol !== "https:") {
+          setError("Invalid invoice link protocol.");
+          return;
+        }
+      } catch {
+        setError("Invalid invoice link format. Please try again.");
         return;
       }
 
@@ -80,7 +97,12 @@ export function Payment() {
         invoice_payload: payment.invoice_payload,
       });
 
-      webapp.openInvoice(payment.invoice_link);
+      try {
+        webapp.openInvoice(invoiceLink);
+      } catch {
+        // Fallback: open in browser if Telegram SDK rejects format.
+        window.open(invoiceLink, "_blank", "noopener,noreferrer");
+      }
 
       // 2) Poll backend until we receive `successful_payment`.
       const startedAt = Date.now();
