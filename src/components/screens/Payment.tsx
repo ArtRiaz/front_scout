@@ -151,7 +151,7 @@ export function Payment() {
   return (
     <StepLayout
       step={2}
-      ctaLabel="Pay 50 Stars"
+      ctaLabel="Pay 1 Star"
       ctaLoading={isSubmitting}
       ctaDisabled={!stagedVideoId}
       onCta={handlePay}
@@ -214,9 +214,7 @@ export function Payment() {
             {/* Price */}
             <div className="border-t border-border bg-surface-secondary px-5 py-4">
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-bold text-text-primary">
-                  50
-                </span>
+                <span className="text-4xl font-bold text-text-primary">1</span>
                 <span className="text-base text-text-tertiary">
                   Stars
                 </span>
