@@ -2,6 +2,7 @@ interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
   close: () => void;
+  openInvoice: (link: string) => void;
   MainButton: {
     text: string;
     show: () => void;

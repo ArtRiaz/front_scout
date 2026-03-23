@@ -24,10 +24,13 @@ async function request<T>(
 }
 
 export async function registerUser(data: RegistrationPayload) {
-  return request<{ id: string; status: string }>("/api/register", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  return request<{ id: string; status: string; created_at?: string }>(
+    "/api/register",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+  );
 }
 
 export async function initiatePayment(telegramUserId: number) {
@@ -36,25 +39,30 @@ export async function initiatePayment(telegramUserId: number) {
     status: string;
     amount: number;
     currency: string;
+    invoice_link: string;
+    invoice_payload: string;
   }>("/api/payment/initiate", {
     method: "POST",
     body: JSON.stringify({ telegram_user_id: telegramUserId }),
   });
 }
 
-export async function uploadVideo(telegramUserId: number, file: File) {
+export async function stageVideo(
+  telegramUserId: number,
+  file: File,
+) {
   const formData = new FormData();
   formData.append("telegram_user_id", String(telegramUserId));
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE}/api/video/upload`, {
+  const res = await fetch(`${API_BASE}/api/video/stage`, {
     method: "POST",
     body: formData,
   });
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `Upload failed: ${res.status}`);
+    throw new Error(body.detail || `Stage upload failed: ${res.status}`);
   }
 
   return res.json() as Promise<{
@@ -62,4 +70,43 @@ export async function uploadVideo(telegramUserId: number, file: File) {
     file_url: string;
     status: string;
   }>;
+}
+
+export async function submitVideo(
+  telegramUserId: number,
+  videoId: string,
+) {
+  return request<{
+    video_id: string;
+    file_url: string;
+    status: string;
+  }>("/api/video/submit", {
+    method: "POST",
+    body: JSON.stringify({ telegram_user_id: telegramUserId, video_id: videoId }),
+  });
+}
+
+export async function getStatus(telegramUserId: number) {
+  return request<{
+    telegram_user_id: number;
+    status: string;
+    has_registration: boolean;
+    has_payment: boolean;
+    has_video: boolean;
+  }>(`/api/status/${telegramUserId}`);
+}
+
+export async function trackEvent(
+  telegramUserId: number,
+  event_type: string,
+  metadata?: Record<string, unknown>,
+) {
+  return request<{ ok: boolean }>("/api/event", {
+    method: "POST",
+    body: JSON.stringify({
+      telegram_user_id: telegramUserId,
+      event_type,
+      metadata,
+    }),
+  });
 }

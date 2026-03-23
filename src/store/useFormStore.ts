@@ -4,12 +4,12 @@ import type { FormData, Step } from "@/types";
 interface FormStore {
   step: Step;
   form: FormData;
-  videoFile: File | null;
-  videoName: string;
+  stagedVideoId: string | null;
+  stagedVideoName: string;
   isSubmitting: boolean;
   setStep: (step: Step) => void;
   updateForm: (field: keyof FormData, value: string | boolean) => void;
-  setVideoFile: (file: File | null) => void;
+  setStagedVideo: (videoId: string | null, videoName?: string) => void;
   setSubmitting: (v: boolean) => void;
   reset: () => void;
 }
@@ -34,8 +34,8 @@ const initialForm: FormData = {
 export const useFormStore = create<FormStore>((set) => ({
   step: 0,
   form: { ...initialForm },
-  videoFile: null,
-  videoName: "",
+  stagedVideoId: null,
+  stagedVideoName: "",
   isSubmitting: false,
 
   setStep: (step) => set({ step }),
@@ -45,8 +45,11 @@ export const useFormStore = create<FormStore>((set) => ({
       form: { ...state.form, [field]: value },
     })),
 
-  setVideoFile: (file) =>
-    set({ videoFile: file, videoName: file?.name ?? "" }),
+  setStagedVideo: (videoId, videoName) =>
+    set({
+      stagedVideoId: videoId,
+      stagedVideoName: videoName ?? "",
+    }),
 
   setSubmitting: (v) => set({ isSubmitting: v }),
 
@@ -54,8 +57,8 @@ export const useFormStore = create<FormStore>((set) => ({
     set({
       step: 0,
       form: { ...initialForm },
-      videoFile: null,
-      videoName: "",
+      stagedVideoId: null,
+      stagedVideoName: "",
       isSubmitting: false,
     }),
 }));

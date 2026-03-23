@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useFormStore } from "@/store/useFormStore";
 import { StepLayout } from "@/components/layout/StepLayout";
+import { getTelegramUserId, getWebApp } from "@/lib/telegram";
+import { getStatus, initiatePayment, submitVideo, trackEvent } from "@/lib/api";
 
 const BENEFITS = [
   {
@@ -44,20 +46,72 @@ const BENEFITS = [
 ];
 
 export function Payment() {
-  const { isSubmitting, setSubmitting } = useFormStore();
+  const { stagedVideoId, isSubmitting, setSubmitting } = useFormStore();
   const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
 
   const handlePay = async () => {
-    setSubmitting(true);
+    try {
+      setError("");
 
-    // TODO: wire up real API calls here
-    // 1. registerUser(payload) — send registration
-    // 2. initiatePayment(telegramUserId) — process payment
-    // 3. uploadVideo(telegramUserId, videoFile) — upload video
-    await new Promise((r) => setTimeout(r, 2000));
+      if (!stagedVideoId) {
+        setError("Please upload your video first.");
+        return;
+      }
 
-    setSubmitting(false);
-    setDone(true);
+      const tgId = getTelegramUserId();
+      if (!tgId) {
+        setError("Open this mini app from Telegram to continue.");
+        return;
+      }
+
+      setSubmitting(true);
+
+      // 1) Create invoice (Stars) and open invoice UI in Telegram.
+      const payment = await initiatePayment(tgId);
+
+      const webapp = getWebApp();
+      if (!webapp?.openInvoice) {
+        setError("Telegram invoice UI is not available.");
+        return;
+      }
+
+      await trackEvent(tgId, "invoice_opened", {
+        invoice_payload: payment.invoice_payload,
+      });
+
+      webapp.openInvoice(payment.invoice_link);
+
+      // 2) Poll backend until we receive `successful_payment`.
+      const startedAt = Date.now();
+      const timeoutMs = 180_000; // 3 minutes
+
+      // eslint-disable-next-line no-constant-condition
+      while (Date.now() - startedAt < timeoutMs) {
+        const status = await getStatus(tgId);
+        if (status.has_payment) break;
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+
+      const status = await getStatus(tgId);
+      if (!status.has_payment) {
+        setError(
+          "Payment not confirmed yet. If you don't have Stars, you can buy them with @PremiumBot."
+        );
+        return;
+      }
+
+      // 3) Finalize video only after payment is confirmed.
+      await submitVideo(tgId, stagedVideoId);
+
+      setDone(true);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong. Try again.";
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (done) {
@@ -97,11 +151,26 @@ export function Payment() {
   return (
     <StepLayout
       step={2}
-      ctaLabel="Pay $50"
+      ctaLabel="Pay 50 Stars"
       ctaLoading={isSubmitting}
+      ctaDisabled={!stagedVideoId}
       onCta={handlePay}
     >
       <div className="space-y-5 pt-2">
+        {error && (
+          <div className="rounded-xl border border-error/30 bg-error/5 px-4 py-3">
+            <p className="text-sm text-error">{error}</p>
+            <a
+              href="https://t.me/PremiumBot"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex h-10 items-center justify-center rounded-lg bg-accent/10 px-3 text-sm font-semibold text-accent hover:bg-accent/15 transition-colors"
+            >
+              Buy Stars with @PremiumBot
+            </a>
+          </div>
+        )}
+
         <section className="text-center pt-2">
           <h2 className="text-2xl font-bold text-text-primary mb-2">
             Basic Trial
@@ -146,10 +215,10 @@ export function Payment() {
             <div className="border-t border-border bg-surface-secondary px-5 py-4">
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-4xl font-bold text-text-primary">
-                  $50
+                  50
                 </span>
                 <span className="text-base text-text-tertiary">
-                  one-time
+                  Stars
                 </span>
               </div>
             </div>

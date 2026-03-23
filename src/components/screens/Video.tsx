@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { useFormStore } from "@/store/useFormStore";
 import { StepLayout } from "@/components/layout/StepLayout";
+import { stageVideo } from "@/lib/api";
+import { getTelegramUserId } from "@/lib/telegram";
 
 const REQUIREMENTS = [
   { icon: "⏱", text: "3–5 minutes of highlights" },
@@ -14,10 +16,12 @@ const REQUIREMENTS = [
 const MAX_SIZE_MB = 100;
 
 export function Video() {
-  const { videoFile, videoName, setVideoFile, setStep } = useFormStore();
+  const { stagedVideoId, stagedVideoName, setStagedVideo, setStep } =
+    useFormStore();
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [isStaging, setIsStaging] = useState(false);
 
   const handleFile = (file: File | undefined) => {
     if (!file) return;
@@ -39,7 +43,26 @@ export function Video() {
       return;
     }
 
-    setVideoFile(file);
+    (async () => {
+      const tgId = getTelegramUserId();
+      if (!tgId) {
+        setError("Please open this mini app from Telegram.");
+        return;
+      }
+
+      setIsStaging(true);
+      try {
+        const res = await stageVideo(tgId, file);
+        setStagedVideo(res.video_id, file.name);
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : "Could not upload video. Try again.";
+        setError(message);
+        setStagedVideo(null);
+      } finally {
+        setIsStaging(false);
+      }
+    })();
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -48,16 +71,12 @@ export function Video() {
     handleFile(e.dataTransfer.files[0]);
   };
 
-  const formatSize = (bytes: number) => {
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
   return (
     <StepLayout
       step={1}
       ctaLabel="Continue to Payment"
-      ctaDisabled={!videoFile}
+      ctaDisabled={!stagedVideoId || isStaging}
+      ctaLoading={isStaging}
       onCta={() => setStep(2)}
     >
       <div className="space-y-5 pt-2">
@@ -99,7 +118,7 @@ export function Video() {
             onChange={(e) => handleFile(e.target.files?.[0])}
           />
 
-          {!videoFile ? (
+          {!stagedVideoId ? (
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -161,15 +180,15 @@ export function Video() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-text-primary truncate">
-                    {videoName}
+                    {stagedVideoName}
                   </p>
                   <p className="text-xs text-text-tertiary">
-                    {formatSize(videoFile.size)}
+                    Uploaded to server. Will be submitted after payment.
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setVideoFile(null)}
+                  onClick={() => setStagedVideo(null)}
                   className="h-8 w-8 rounded-lg flex items-center justify-center text-text-tertiary hover:bg-surface-secondary hover:text-text-primary transition-colors"
                 >
                   <svg
