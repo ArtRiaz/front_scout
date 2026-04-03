@@ -12,6 +12,16 @@ import {
   trackEvent,
 } from "@/lib/api";
 
+/** Shown until GET /api/payment/info succeeds. Set NEXT_PUBLIC_PAYMENT_STARS on Vercel to override default. */
+function defaultStarsForDisplay(): number {
+  const raw = process.env.NEXT_PUBLIC_PAYMENT_STARS;
+  if (raw != null && String(raw).trim() !== "") {
+    const n = Math.round(Number(raw));
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return 250;
+}
+
 const BENEFITS = [
   {
     icon: (
@@ -55,12 +65,17 @@ export function Payment() {
   const { stagedVideoId, isSubmitting, setSubmitting } = useFormStore();
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
-  const [starsAmount, setStarsAmount] = useState<number | null>(null);
+  const [starsAmount, setStarsAmount] = useState<number>(() => defaultStarsForDisplay());
 
   useEffect(() => {
     getPaymentInfo()
-      .then((info) => setStarsAmount(Math.round(Number(info.amount))))
-      .catch(() => setStarsAmount(null));
+      .then((info) => {
+        const n = Math.round(Number(info.amount));
+        if (Number.isFinite(n) && n > 0) setStarsAmount(n);
+      })
+      .catch(() => {
+        /* keep defaultStarsForDisplay() already in state */
+      });
   }, []);
 
   const handlePay = async () => {
@@ -191,10 +206,7 @@ export function Payment() {
     );
   }
 
-  const starsLabel =
-    starsAmount != null && starsAmount > 0
-      ? `Pay ${starsAmount} Star${starsAmount === 1 ? "" : "s"}`
-      : "Pay with Stars";
+  const starsLabel = `Pay ${starsAmount} Star${starsAmount === 1 ? "" : "s"}`;
 
   return (
     <StepLayout
@@ -263,7 +275,7 @@ export function Payment() {
             <div className="border-t border-border bg-surface-secondary px-5 py-4">
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-4xl font-bold text-text-primary">
-                  {starsAmount != null && starsAmount > 0 ? starsAmount : "—"}
+                  {starsAmount}
                 </span>
                 <span className="text-base text-text-tertiary">
                   Stars

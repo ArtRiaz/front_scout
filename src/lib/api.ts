@@ -1,16 +1,23 @@
 import type { RegistrationPayload } from "@/types";
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== "undefined"
-    ? new URLSearchParams(window.location.search).get("api") || ""
-    : "");
+/** Resolve API host on each call so ?api= from Telegram WebApp URL is always used. */
+function getApiBase(): string {
+  const trimEnd = (s: string) => s.replace(/\/+$/, "");
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (envUrl) return trimEnd(envUrl);
+  if (typeof window !== "undefined") {
+    const fromQuery = new URLSearchParams(window.location.search).get("api")?.trim();
+    if (fromQuery) return trimEnd(fromQuery);
+  }
+  return "";
+}
 
 async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const base = getApiBase();
+  const res = await fetch(`${base}${path}`, {
     headers: { "Content-Type": "application/json", ...options.headers },
     ...options,
   });
@@ -59,7 +66,8 @@ export async function stageVideo(
   formData.append("telegram_user_id", String(telegramUserId));
   formData.append("file", file);
 
-  const res = await fetch(`${API_BASE}/api/video/stage`, {
+  const base = getApiBase();
+  const res = await fetch(`${base}/api/video/stage`, {
     method: "POST",
     body: formData,
   });
