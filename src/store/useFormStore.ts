@@ -7,10 +7,13 @@ interface FormStore {
   stagedVideoId: string | null;
   stagedVideoName: string;
   isSubmitting: boolean;
+  /** Set when user already finished video submit + payment (resume shows thank-you). */
+  applicationComplete: boolean;
   setStep: (step: Step) => void;
   updateForm: (field: keyof FormData, value: string | boolean) => void;
   setStagedVideo: (videoId: string | null, videoName?: string) => void;
   setSubmitting: (v: boolean) => void;
+  setApplicationComplete: (v: boolean) => void;
   reset: () => void;
 }
 
@@ -37,6 +40,7 @@ export const useFormStore = create<FormStore>((set) => ({
   stagedVideoId: null,
   stagedVideoName: "",
   isSubmitting: false,
+  applicationComplete: false,
 
   setStep: (step) => set({ step }),
 
@@ -53,6 +57,8 @@ export const useFormStore = create<FormStore>((set) => ({
 
   setSubmitting: (v) => set({ isSubmitting: v }),
 
+  setApplicationComplete: (v) => set({ applicationComplete: v }),
+
   reset: () =>
     set({
       step: 0,
@@ -60,5 +66,6 @@ export const useFormStore = create<FormStore>((set) => ({
       stagedVideoId: null,
       stagedVideoName: "",
       isSubmitting: false,
+      applicationComplete: false,
     }),
 }));
