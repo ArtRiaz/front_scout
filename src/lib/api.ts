@@ -1,6 +1,5 @@
 import type { RegistrationPayload } from "@/types";
 
-/** Resolve API host on each call so ?api= from Telegram WebApp URL is always used. */
 function getApiBase(): string {
   const trimEnd = (s: string) => s.replace(/\/+$/, "");
   const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
@@ -58,10 +57,7 @@ export async function initiatePayment(telegramUserId: number) {
   });
 }
 
-export async function stageVideo(
-  telegramUserId: number,
-  file: File,
-) {
+export async function stageVideo(telegramUserId: number, file: File) {
   const formData = new FormData();
   formData.append("telegram_user_id", String(telegramUserId));
   formData.append("file", file);
@@ -84,10 +80,7 @@ export async function stageVideo(
   }>;
 }
 
-export async function submitVideo(
-  telegramUserId: number,
-  videoId: string,
-) {
+export async function submitVideo(telegramUserId: number, videoId: string) {
   return request<{
     video_id: string;
     file_url: string;
@@ -105,6 +98,7 @@ export async function getStatus(telegramUserId: number) {
     has_registration: boolean;
     has_payment: boolean;
     has_video: boolean;
+    staged_video_id?: string | null;
   }>(`/api/status/${telegramUserId}`);
 }
 

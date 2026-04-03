@@ -12,7 +12,6 @@ import {
   trackEvent,
 } from "@/lib/api";
 
-/** Shown until GET /api/payment/info succeeds. Set NEXT_PUBLIC_PAYMENT_STARS on Vercel to override default. */
 function defaultStarsForDisplay(): number {
   const raw = process.env.NEXT_PUBLIC_PAYMENT_STARS;
   if (raw != null && String(raw).trim() !== "") {
@@ -62,7 +61,12 @@ const BENEFITS = [
 ];
 
 export function Payment() {
-  const { stagedVideoId, isSubmitting, setSubmitting } = useFormStore();
+  const {
+    stagedVideoId,
+    isSubmitting,
+    setSubmitting,
+    setApplicationComplete,
+  } = useFormStore();
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [starsAmount, setStarsAmount] = useState<number>(() => defaultStarsForDisplay());
@@ -73,9 +77,7 @@ export function Payment() {
         const n = Math.round(Number(info.amount));
         if (Number.isFinite(n) && n > 0) setStarsAmount(n);
       })
-      .catch(() => {
-        /* keep defaultStarsForDisplay() already in state */
-      });
+      .catch(() => {});
   }, []);
 
   const handlePay = async () => {
@@ -95,7 +97,6 @@ export function Payment() {
 
       setSubmitting(true);
 
-      // 1) Create invoice (Stars) and open invoice UI in Telegram.
       const payment = await initiatePayment(tgId);
       const invoiceLink = String(payment.invoice_link || "").trim();
 
@@ -109,7 +110,6 @@ export function Payment() {
         return;
       }
 
-      // Validate URL shape early to avoid Telegram SDK pattern errors.
       try {
         const parsed = new URL(invoiceLink);
         if (parsed.protocol !== "https:") {
@@ -128,13 +128,11 @@ export function Payment() {
       try {
         webapp.openInvoice(invoiceLink);
       } catch {
-        // Fallback: open in browser if Telegram SDK rejects format.
         window.open(invoiceLink, "_blank", "noopener,noreferrer");
       }
 
-      // 2) Poll backend until we receive `successful_payment`.
       const startedAt = Date.now();
-      const timeoutMs = 180_000; // 3 minutes
+      const timeoutMs = 180_000;
 
       // eslint-disable-next-line no-constant-condition
       while (Date.now() - startedAt < timeoutMs) {
@@ -151,12 +149,11 @@ export function Payment() {
         return;
       }
 
-      // 3) Finalize video only after payment is confirmed.
       await submitVideo(tgId, stagedVideoId);
 
       setDone(true);
+      setApplicationComplete(true);
 
-      // Close Telegram Mini App after successful end-to-end flow.
       const closeTarget = getWebApp();
       if (closeTarget?.close) {
         setTimeout(() => {
@@ -240,7 +237,6 @@ export function Payment() {
           </p>
         </section>
 
-        {/* Offer Card */}
         <section>
           <div className="relative overflow-hidden rounded-2xl bg-surface border border-border shadow-md">
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent to-accent-light" />
@@ -271,7 +267,6 @@ export function Payment() {
               </div>
             </div>
 
-            {/* Price */}
             <div className="border-t border-border bg-surface-secondary px-5 py-4">
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-4xl font-bold text-text-primary">
@@ -285,7 +280,6 @@ export function Payment() {
           </div>
         </section>
 
-        {/* Trust Signals */}
         <section className="flex flex-col items-center gap-2 text-center pb-2">
           <div className="flex items-center gap-1.5 text-text-tertiary">
             <svg
