@@ -33,6 +33,10 @@ export async function registerUser(data: RegistrationPayload) {
   );
 }
 
+export async function getPaymentInfo() {
+  return request<{ amount: number; currency: string }>("/api/payment/info");
+}
+
 export async function initiatePayment(telegramUserId: number) {
   return request<{
     payment_id: string;

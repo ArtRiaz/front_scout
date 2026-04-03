@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormStore } from "@/store/useFormStore";
 import { StepLayout } from "@/components/layout/StepLayout";
 import { getTelegramUserId, getWebApp } from "@/lib/telegram";
-import { getStatus, initiatePayment, submitVideo, trackEvent } from "@/lib/api";
+import {
+  getPaymentInfo,
+  getStatus,
+  initiatePayment,
+  submitVideo,
+  trackEvent,
+} from "@/lib/api";
 
 const BENEFITS = [
   {
@@ -49,6 +55,13 @@ export function Payment() {
   const { stagedVideoId, isSubmitting, setSubmitting } = useFormStore();
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  const [starsAmount, setStarsAmount] = useState<number | null>(null);
+
+  useEffect(() => {
+    getPaymentInfo()
+      .then((info) => setStarsAmount(Math.round(Number(info.amount))))
+      .catch(() => setStarsAmount(null));
+  }, []);
 
   const handlePay = async () => {
     try {
@@ -178,10 +191,15 @@ export function Payment() {
     );
   }
 
+  const starsLabel =
+    starsAmount != null && starsAmount > 0
+      ? `Pay ${starsAmount} Star${starsAmount === 1 ? "" : "s"}`
+      : "Pay with Stars";
+
   return (
     <StepLayout
       step={2}
-      ctaLabel="Pay 1 Star"
+      ctaLabel={starsLabel}
       ctaLoading={isSubmitting}
       ctaDisabled={!stagedVideoId}
       onCta={handlePay}
@@ -244,7 +262,9 @@ export function Payment() {
             {/* Price */}
             <div className="border-t border-border bg-surface-secondary px-5 py-4">
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-bold text-text-primary">1</span>
+                <span className="text-4xl font-bold text-text-primary">
+                  {starsAmount != null && starsAmount > 0 ? starsAmount : "—"}
+                </span>
                 <span className="text-base text-text-tertiary">
                   Stars
                 </span>
