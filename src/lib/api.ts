@@ -2,7 +2,9 @@ import type { RegistrationPayload } from "@/types";
 
 function getApiBase(): string {
   const trimEnd = (s: string) => s.replace(/\/+$/, "");
-  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  const envUrl =
+    process.env.NEXT_PUBLIC_API_URL?.trim() ||
+    process.env.NEXT_PUBLIC_API_PROXY_ORIGIN?.trim();
   if (envUrl) return trimEnd(envUrl);
   if (typeof window !== "undefined") {
     const fromQuery = new URLSearchParams(window.location.search).get("api")?.trim();
