@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @theme {
+  /* FC Real Pharma — club accent (use sparingly: borders, pills, dividers) */
+  --color-club-red: #C41E3A;
+  --color-club-red-dark: #9B1B2E;
+  --color-club-red-subtle: #FEF2F3;
   --color-brand: #1A1A2E;
   --color-brand-light: #2A2A4E;
   --color-accent: #4F46E5;
