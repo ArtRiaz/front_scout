@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useFormStore } from "@/store/useFormStore";
 import { initTelegram, getWebApp, getTelegramUserId } from "@/lib/telegram";
 import { getStatus } from "@/lib/api";
+import { Welcome } from "@/components/screens/Welcome";
 import { Registration } from "@/components/screens/Registration";
 import { Video } from "@/components/screens/Video";
 import { Payment } from "@/components/screens/Payment";
@@ -52,6 +53,7 @@ export default function Home() {
   } = useFormStore();
   const [hydrated, setHydrated] = useState(false);
   const [statusLoadError, setStatusLoadError] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     initTelegram();
@@ -71,6 +73,7 @@ export default function Home() {
         if (cancelled) return;
 
         if (!s.has_registration) {
+          setShowWelcome(true);
           setStep(0);
           setApplicationComplete(false);
         } else if (s.status === "video_uploaded" && s.has_payment) {
@@ -108,9 +111,15 @@ export default function Home() {
       return;
     }
 
-    if (step > 0) {
+    if (step > 0 || (step === 0 && !showWelcome)) {
       webapp.BackButton.show();
-      const handleBack = () => setStep((step - 1) as 0 | 1);
+      const handleBack = () => {
+        if (step === 0 && !showWelcome) {
+          setShowWelcome(true);
+        } else {
+          setStep((step - 1) as 0 | 1);
+        }
+      };
       webapp.BackButton.onClick(handleBack);
       return () => {
         webapp.BackButton.offClick(handleBack);
@@ -118,7 +127,7 @@ export default function Home() {
     } else {
       webapp.BackButton.hide();
     }
-  }, [step, setStep, applicationComplete]);
+  }, [step, setStep, applicationComplete, showWelcome]);
 
   if (!hydrated) {
     return (
@@ -159,6 +168,10 @@ export default function Home() {
 
   if (applicationComplete) {
     return <FlowCompleteScreen />;
+  }
+
+  if (showWelcome) {
+    return <Welcome onStart={() => setShowWelcome(false)} />;
   }
 
   switch (step) {
