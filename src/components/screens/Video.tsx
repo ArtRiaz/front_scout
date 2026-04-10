@@ -75,7 +75,7 @@ export function Video() {
   return (
     <StepLayout
       step={1}
-      ctaLabel="Continue to Payment"
+      ctaLabel="Continue to Official Review"
       ctaDisabled={!stagedVideoId || isStaging}
       ctaLoading={isStaging}
       onCta={() => setStep(2)}
