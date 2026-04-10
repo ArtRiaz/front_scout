@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* FC Real Pharma — club accent (use sparingly: borders, pills, dividers) */
-  --color-club-red: #C41E3A;
-  --color-club-red-dark: #9B1B2E;
-  --color-club-red-subtle: #FEF2F3;
+  /* FC Real Pharma — club red base + hover accent */
+  --color-club-red: #C11F16;
+  --color-club-red-hover: #A91B14;
+  --color-club-red-dark: #A91B14;
+  --color-club-red-subtle: #FDF3F2;
   --color-brand: #1A1A2E;
   --color-brand-light: #2A2A4E;
   --color-accent: #4F46E5;
@@ -52,6 +53,16 @@
 }
 
 @layer components {
+  .welcome-cta {
+    height: 3.625rem;
+    min-height: 3.625rem;
+    border-radius: 1rem;
+  }
+
+  .welcome-cta:hover:not(:disabled) {
+    background-color: var(--color-brand-light);
+  }
+
   .step-enter {
     animation: stepIn 0.25s ease-out;
   }
