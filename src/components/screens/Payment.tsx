@@ -11,6 +11,7 @@ import {
   submitVideo,
   trackEvent,
 } from "@/lib/api";
+import { ClubBadge } from "@/components/ui/ClubBadge";
 
 function defaultStarsForDisplay(): number {
   const raw = process.env.NEXT_PUBLIC_PAYMENT_STARS;
@@ -29,7 +30,7 @@ const BENEFITS = [
       </svg>
     ),
     title: "Profile Review",
-    desc: "Your registration data reviewed by our scouts",
+    desc: "Your registration is reviewed by the club team",
   },
   {
     icon: (
@@ -37,17 +38,8 @@ const BENEFITS = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
       </svg>
     ),
-    title: "Video Analysis",
-    desc: "Professional evaluation of your footage",
-  },
-  {
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-      </svg>
-    ),
-    title: "Expert Feedback",
-    desc: "Detailed feedback on your strengths and areas to improve",
+    title: "Video Review",
+    desc: "Your footage is reviewed as part of the screening process",
   },
   {
     icon: (
@@ -55,8 +47,17 @@ const BENEFITS = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    title: "Eligibility Decision",
-    desc: "Clear decision on your next stage qualification",
+    title: "Selection Decision",
+    desc: "You receive a clear next-step decision",
+  },
+  {
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      </svg>
+    ),
+    title: "Official Submission",
+    desc: "Your application becomes officially submitted after payment",
   },
 ];
 
@@ -192,8 +193,8 @@ export function Payment() {
             You&apos;re All Set!
           </h2>
           <p className="text-base text-text-secondary max-w-xs leading-relaxed">
-            Your application has been submitted. Our team will review your
-            profile and video, and get back to you within 48 hours.
+            Your application has been officially submitted to FC Real Pharma.
+            Selected players will be contacted with next steps.
           </p>
           <p className="text-sm text-text-tertiary mt-6">
             You can close this window now.
@@ -203,7 +204,7 @@ export function Payment() {
     );
   }
 
-  const starsLabel = `Pay ${starsAmount} Star${starsAmount === 1 ? "" : "s"}`;
+  const starsLabel = `Complete Submission — ${starsAmount} Star${starsAmount === 1 ? "" : "s"}`;
 
   return (
     <StepLayout
@@ -228,12 +229,14 @@ export function Payment() {
           </div>
         )}
 
-        <section className="text-center pt-2">
-          <h2 className="text-2xl font-bold text-text-primary mb-2">
-            Basic Trial
+        <ClubBadge />
+
+        <section className="text-center pt-1">
+          <h2 className="text-2xl font-bold text-text-primary mb-1">
+            Official Player Screening
           </h2>
-          <p className="text-lg text-text-secondary">
-            Eligibility Review
+          <p className="text-base text-text-secondary">
+            Official club review
           </p>
         </section>
 
@@ -242,10 +245,9 @@ export function Payment() {
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent to-accent-light" />
 
             <div className="p-5 space-y-4">
-              <p className="text-sm text-text-secondary">
-                Get your profile and video evaluated by professional scouts.
-                Receive actionable feedback and a clear decision on your next
-                step.
+              <p className="text-sm text-text-secondary leading-relaxed">
+                Submit your profile and video for official review by FC Real Pharma.
+                Selected players move to the next stage of the screening process.
               </p>
 
               <div className="space-y-3">
@@ -268,12 +270,17 @@ export function Payment() {
             </div>
 
             <div className="border-t border-border bg-surface-secondary px-5 py-4">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-bold text-text-primary">
-                  {starsAmount}
-                </span>
-                <span className="text-base text-text-tertiary">
-                  Stars
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-text-primary">
+                    {starsAmount}
+                  </span>
+                  <span className="text-base text-text-tertiary">
+                    Stars
+                  </span>
+                </div>
+                <span className="text-xs text-text-tertiary">
+                  One-time review fee
                 </span>
               </div>
             </div>
@@ -295,12 +302,8 @@ export function Payment() {
                 d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
               />
             </svg>
-            <span className="text-sm">Secure payment</span>
+            <span className="text-sm">Secure payment via Telegram</span>
           </div>
-          <p className="text-xs text-text-tertiary max-w-[260px] leading-relaxed">
-            Your payment is processed securely. You&apos;ll receive confirmation
-            via Telegram after successful payment.
-          </p>
         </section>
       </div>
     </StepLayout>

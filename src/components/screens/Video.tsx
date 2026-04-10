@@ -5,6 +5,7 @@ import { useFormStore } from "@/store/useFormStore";
 import { StepLayout } from "@/components/layout/StepLayout";
 import { stageVideo } from "@/lib/api";
 import { getTelegramUserId } from "@/lib/telegram";
+import { ClubBadge } from "@/components/ui/ClubBadge";
 
 const REQUIREMENTS = [
   { icon: "⏱", text: "3–5 minutes of highlights" },
@@ -80,6 +81,7 @@ export function Video() {
       onCta={() => setStep(2)}
     >
       <div className="space-y-5 pt-2">
+        <ClubBadge />
         <section>
           <h2 className="text-2xl font-bold text-text-primary mb-2">
             Upload Your Video

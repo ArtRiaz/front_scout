@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/Checkbox";
 import { COUNTRIES, POSITIONS, DOMINANT_FEET } from "@/types";
 import { registerUser } from "@/lib/api";
 import { getTelegramUserId } from "@/lib/telegram";
+import { ClubBadge } from "@/components/ui/ClubBadge";
 
 export function Registration() {
   const { form, updateForm, setStep } = useFormStore();
@@ -109,6 +110,7 @@ export function Registration() {
       onCta={handleContinue}
     >
       <div className="space-y-5 pt-2">
+        <ClubBadge />
         {submitError && (
           <div className="rounded-xl border border-error/30 bg-error/5 px-4 py-3">
             <p className="text-sm text-error">{submitError}</p>
