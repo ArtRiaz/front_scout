@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useFormStore } from "@/store/useFormStore";
 import { initTelegram, getWebApp, getTelegramUserId } from "@/lib/telegram";
 import { getStatus } from "@/lib/api";
+import { initLocale, t } from "@/lib/i18n";
 import { Welcome } from "@/components/screens/Welcome";
 import { Registration } from "@/components/screens/Registration";
 import { Video } from "@/components/screens/Video";
@@ -29,14 +30,13 @@ function FlowCompleteScreen() {
           </svg>
         </div>
         <h2 className="text-2xl font-bold text-text-primary mb-2">
-          You&apos;re All Set!
+          {t("done.title")}
         </h2>
         <p className="text-base text-text-secondary max-w-xs leading-relaxed">
-          Your application has been submitted. Our team will review your profile
-          and video, and get back to you within 48 hours.
+          {t("done.desc")}
         </p>
         <p className="text-sm text-text-tertiary mt-6">
-          You can close this window now.
+          {t("done.close")}
         </p>
       </div>
     </div>
@@ -57,6 +57,7 @@ export default function Home() {
 
   useEffect(() => {
     initTelegram();
+    initLocale();
   }, []);
 
   useEffect(() => {
@@ -141,8 +142,7 @@ export default function Home() {
     return (
       <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-background px-6 text-center">
         <p className="text-base font-medium text-text-primary max-w-sm">
-          Couldn&apos;t load your application status. Check your connection and
-          try again.
+          {t("misc.status_error")}
         </p>
         <p className="text-xs text-text-tertiary max-w-sm break-words">
           {statusLoadError}
@@ -160,7 +160,7 @@ export default function Home() {
           className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white"
           onClick={() => window.location.reload()}
         >
-          Retry
+          {t("misc.retry")}
         </button>
       </div>
     );

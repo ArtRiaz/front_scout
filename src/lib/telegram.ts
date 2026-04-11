@@ -42,6 +42,7 @@ interface TelegramWebApp {
       first_name: string;
       last_name?: string;
       username?: string;
+      language_code?: string;
     };
     start_param?: string;
   };
@@ -75,6 +76,10 @@ export function getUserName(): string {
   const user = getWebApp()?.initDataUnsafe?.user;
   if (!user) return "";
   return [user.first_name, user.last_name].filter(Boolean).join(" ");
+}
+
+export function getLanguageCode(): string | undefined {
+  return getWebApp()?.initDataUnsafe?.user?.language_code;
 }
 
 export function initTelegram() {

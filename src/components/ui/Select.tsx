@@ -4,6 +4,8 @@ interface SelectProps {
   label: string;
   value: string;
   options: readonly (string | { value: string; label: string })[];
+  /** When options are plain strings but the submitted value should differ. */
+  optionValues?: readonly string[];
   placeholder?: string;
   error?: string;
   onChange: (value: string) => void;
@@ -13,6 +15,7 @@ export function Select({
   label,
   value,
   options,
+  optionValues,
   placeholder = "Select...",
   error,
   onChange,
@@ -35,9 +38,10 @@ export function Select({
           <option value="" disabled>
             {placeholder}
           </option>
-          {options.map((opt) => {
-            const val = typeof opt === "string" ? opt : opt.value;
-            const lbl = typeof opt === "string" ? opt : opt.label;
+          {options.map((opt, i) => {
+            const isObj = typeof opt !== "string";
+            const val = isObj ? opt.value : optionValues?.[i] ?? opt;
+            const lbl = isObj ? opt.label : opt;
             return (
               <option key={val} value={val}>
                 {lbl}

@@ -7,6 +7,7 @@ interface TextareaProps
   label: string;
   error?: string;
   optional?: boolean;
+  optionalLabel?: string;
   onChange: (value: string) => void;
 }
 
@@ -14,6 +15,7 @@ export function Textarea({
   label,
   error,
   optional,
+  optionalLabel,
   onChange,
   className = "",
   ...props
@@ -24,7 +26,7 @@ export function Textarea({
         {label}
         {optional && (
           <span className="ml-1 text-text-tertiary font-normal">
-            (optional)
+            {optionalLabel ?? "(optional)"}
           </span>
         )}
       </label>

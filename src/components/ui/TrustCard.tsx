@@ -1,10 +1,12 @@
 "use client";
 
-const TRUST_POINTS = [
-  "Official club process",
-  "Real club review",
-  "Next step for selected players",
-] as const;
+import { t, type TranslationKey } from "@/lib/i18n";
+
+const TRUST_KEYS: TranslationKey[] = [
+  "trust.official",
+  "trust.real_review",
+  "trust.next_step",
+];
 
 function CheckBadge() {
   return (
@@ -35,11 +37,11 @@ export function TrustCard() {
       <div className="h-px w-full bg-club-red" aria-hidden />
       <div className="px-3.5 py-3">
         <ul className="space-y-2">
-          {TRUST_POINTS.map((title) => (
-            <li key={title} className="flex items-center gap-2.5">
+          {TRUST_KEYS.map((key) => (
+            <li key={key} className="flex items-center gap-2.5">
               <CheckBadge />
               <span className="text-[13px] font-medium leading-tight text-text-primary">
-                {title}
+                {t(key)}
               </span>
             </li>
           ))}

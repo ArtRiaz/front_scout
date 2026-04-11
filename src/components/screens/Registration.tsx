@@ -7,10 +7,37 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { COUNTRIES, POSITIONS, DOMINANT_FEET } from "@/types";
+import { COUNTRIES, POSITIONS } from "@/types";
 import { registerUser } from "@/lib/api";
 import { getTelegramUserId } from "@/lib/telegram";
 import { ClubBadge } from "@/components/ui/ClubBadge";
+import { t, getLocale } from "@/lib/i18n";
+
+const DOMINANT_FEET_I18N = () => [
+  { value: "right", label: t("foot.right") },
+  { value: "left", label: t("foot.left") },
+  { value: "both", label: t("foot.both") },
+];
+
+const POSITIONS_I18N = () => {
+  const keys: Record<string, Parameters<typeof t>[0]> = {
+    "Goalkeeper": "pos.goalkeeper",
+    "Centre-Back": "pos.centre_back",
+    "Left-Back": "pos.left_back",
+    "Right-Back": "pos.right_back",
+    "Defensive Midfielder": "pos.defensive_mid",
+    "Central Midfielder": "pos.central_mid",
+    "Attacking Midfielder": "pos.attacking_mid",
+    "Left Winger": "pos.left_winger",
+    "Right Winger": "pos.right_winger",
+    "Striker": "pos.striker",
+    "Centre-Forward": "pos.centre_forward",
+  };
+  return POSITIONS.map((p) => ({
+    value: p,
+    label: keys[p] ? t(keys[p]) : p,
+  }));
+};
 
 export function Registration() {
   const { form, updateForm, setStep } = useFormStore();
@@ -21,30 +48,30 @@ export function Registration() {
   const validate = useCallback(() => {
     const e: Record<string, string> = {};
 
-    if (!form.fullName.trim()) e.fullName = "Full name is required";
-    if (!form.age) e.age = "Age is required";
+    if (!form.fullName.trim()) e.fullName = t("val.full_name_required");
+    if (!form.age) e.age = t("val.age_required");
     else {
       const age = Number(form.age);
-      if (age < 10 || age > 60) e.age = "Age must be between 10 and 60";
+      if (age < 10 || age > 60) e.age = t("val.age_range");
     }
-    if (!form.country) e.country = "Country is required";
-    if (!form.city.trim()) e.city = "City is required";
-    if (!form.whatsappPhone.trim()) e.whatsappPhone = "WhatsApp number is required";
+    if (!form.country) e.country = t("val.country_required");
+    if (!form.city.trim()) e.city = t("val.city_required");
+    if (!form.whatsappPhone.trim()) e.whatsappPhone = t("val.whatsapp_required");
     else if (form.whatsappPhone.trim().length < 7)
-      e.whatsappPhone = "Enter a valid phone number";
-    if (!form.position) e.position = "Position is required";
-    if (!form.dominantFoot) e.dominantFoot = "Select your dominant foot";
-    if (!form.heightCm) e.heightCm = "Height is required";
+      e.whatsappPhone = t("val.whatsapp_invalid");
+    if (!form.position) e.position = t("val.position_required");
+    if (!form.dominantFoot) e.dominantFoot = t("val.foot_required");
+    if (!form.heightCm) e.heightCm = t("val.height_required");
     else {
       const h = Number(form.heightCm);
-      if (h < 100 || h > 250) e.heightCm = "Height must be 100–250 cm";
+      if (h < 100 || h > 250) e.heightCm = t("val.height_range");
     }
-    if (!form.weightKg) e.weightKg = "Weight is required";
+    if (!form.weightKg) e.weightKg = t("val.weight_required");
     else {
       const w = Number(form.weightKg);
-      if (w < 30 || w > 200) e.weightKg = "Weight must be 30–200 kg";
+      if (w < 30 || w > 200) e.weightKg = t("val.weight_range");
     }
-    if (!form.consentTerms) e.consentTerms = "You must agree to continue";
+    if (!form.consentTerms) e.consentTerms = t("val.consent_required");
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -56,7 +83,7 @@ export function Registration() {
 
     const tgId = getTelegramUserId();
     if (!tgId) {
-      setSubmitError("Please open this mini app from Telegram.");
+      setSubmitError(t("misc.open_from_tg"));
       return;
     }
 
@@ -83,9 +110,8 @@ export function Registration() {
       setStep(1);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Could not register. Try again.";
+        err instanceof Error ? err.message : t("misc.something_wrong");
 
-      // Idempotency: if registration already exists, just continue.
       if (message.toLowerCase().includes("already registered")) {
         setStep(1);
         return;
@@ -101,10 +127,12 @@ export function Registration() {
     error: errors[key],
   });
 
+  const isUk = getLocale() === "uk";
+
   return (
     <StepLayout
       step={0}
-      ctaLabel="Continue"
+      ctaLabel={t("reg.cta")}
       ctaDisabled={!form.consentTerms || isSubmitting}
       ctaLoading={isSubmitting}
       onCta={handleContinue}
@@ -116,25 +144,24 @@ export function Registration() {
             <p className="text-sm text-error">{submitError}</p>
           </div>
         )}
-        {/* Personal Info */}
         <section>
           <h2 className="text-lg font-semibold text-text-primary mb-1">
-            Personal Information
+            {t("reg.personal_title")}
           </h2>
           <p className="text-sm text-text-tertiary mb-4">
-            Tell us about yourself
+            {t("reg.personal_desc")}
           </p>
           <div className="bg-surface rounded-2xl p-4 space-y-4 shadow-sm border border-border/50">
             <Input
-              label="Full Name"
-              placeholder="John Okafor"
+              label={t("reg.full_name")}
+              placeholder={t("reg.full_name_placeholder")}
               value={form.fullName}
               onChange={(v) => updateForm("fullName", v)}
               {...field("fullName")}
             />
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Age"
+                label={t("reg.age")}
                 type="number"
                 inputMode="numeric"
                 placeholder="22"
@@ -143,23 +170,23 @@ export function Registration() {
                 {...field("age")}
               />
               <Select
-                label="Country"
+                label={t("reg.country")}
                 value={form.country}
                 options={COUNTRIES}
-                placeholder="Select"
+                placeholder={t("reg.country_placeholder")}
                 onChange={(v) => updateForm("country", v)}
                 {...field("country")}
               />
             </div>
             <Input
-              label="City"
-              placeholder="Lagos"
+              label={t("reg.city")}
+              placeholder={t("reg.city_placeholder")}
               value={form.city}
               onChange={(v) => updateForm("city", v)}
               {...field("city")}
             />
             <Input
-              label="WhatsApp Phone"
+              label={t("reg.whatsapp")}
               type="tel"
               inputMode="tel"
               placeholder="+234 800 000 0000"
@@ -168,45 +195,47 @@ export function Registration() {
               {...field("whatsappPhone")}
             />
             <Input
-              label="Email"
+              label={t("reg.email")}
               type="email"
               inputMode="email"
-              placeholder="you@email.com"
+              placeholder={t("reg.email_placeholder")}
               optional
+              optionalLabel={isUk ? t("reg.optional") : undefined}
               value={form.email}
               onChange={(v) => updateForm("email", v)}
             />
           </div>
         </section>
 
-        {/* Football Profile */}
         <section>
           <h2 className="text-lg font-semibold text-text-primary mb-1">
-            Football Profile
+            {t("reg.football_title")}
           </h2>
           <p className="text-sm text-text-tertiary mb-4">
-            Your playing details
+            {t("reg.football_desc")}
           </p>
           <div className="bg-surface rounded-2xl p-4 space-y-4 shadow-sm border border-border/50">
             <Select
-              label="Position"
+              label={t("reg.position")}
               value={form.position}
-              options={POSITIONS}
-              placeholder="Select position"
+              options={POSITIONS_I18N().map((p) => p.label)}
+              optionValues={POSITIONS_I18N().map((p) => p.value)}
+              placeholder={t("reg.position_placeholder")}
               onChange={(v) => updateForm("position", v)}
               {...field("position")}
             />
             <Select
-              label="Dominant Foot"
+              label={t("reg.dominant_foot")}
               value={form.dominantFoot}
-              options={[...DOMINANT_FEET]}
-              placeholder="Select"
+              options={DOMINANT_FEET_I18N().map((f) => f.label)}
+              optionValues={DOMINANT_FEET_I18N().map((f) => f.value)}
+              placeholder={t("reg.dominant_foot_placeholder")}
               onChange={(v) => updateForm("dominantFoot", v)}
               {...field("dominantFoot")}
             />
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Height (cm)"
+                label={t("reg.height")}
                 type="number"
                 inputMode="numeric"
                 placeholder="180"
@@ -215,7 +244,7 @@ export function Registration() {
                 {...field("heightCm")}
               />
               <Input
-                label="Weight (kg)"
+                label={t("reg.weight")}
                 type="number"
                 inputMode="numeric"
                 placeholder="75"
@@ -225,27 +254,28 @@ export function Registration() {
               />
             </div>
             <Input
-              label="Current Club"
-              placeholder="Club name or N/A"
+              label={t("reg.current_club")}
+              placeholder={t("reg.current_club_placeholder")}
               optional
+              optionalLabel={isUk ? t("reg.optional") : undefined}
               value={form.currentClub}
               onChange={(v) => updateForm("currentClub", v)}
             />
             <Checkbox
-              label="I am currently a free agent"
+              label={t("reg.free_agent")}
               checked={form.freeAgent}
               onChange={(v) => updateForm("freeAgent", v)}
             />
           </div>
         </section>
 
-        {/* About */}
         <section>
           <div className="bg-surface rounded-2xl p-4 shadow-sm border border-border/50">
             <Textarea
-              label="About You"
-              placeholder="Briefly describe your football experience, achievements, or goals..."
+              label={t("reg.about")}
+              placeholder={t("reg.about_placeholder")}
               optional
+              optionalLabel={isUk ? t("reg.optional") : undefined}
               value={form.shortAbout}
               onChange={(v) => updateForm("shortAbout", v)}
               maxLength={500}
@@ -256,15 +286,14 @@ export function Registration() {
           </div>
         </section>
 
-        {/* Consent */}
         <section className="pb-2">
           <Checkbox
             label={
               <>
-                I agree to the{" "}
-                <span className="text-accent underline">Terms of Service</span>{" "}
-                and{" "}
-                <span className="text-accent underline">Privacy Policy</span>
+                {t("reg.consent_terms")}{" "}
+                <span className="text-accent underline">{t("reg.terms")}</span>{" "}
+                {t("reg.and")}{" "}
+                <span className="text-accent underline">{t("reg.privacy")}</span>
               </>
             }
             checked={form.consentTerms}

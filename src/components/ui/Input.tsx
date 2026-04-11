@@ -6,6 +6,7 @@ interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChan
   label: string;
   error?: string;
   optional?: boolean;
+  optionalLabel?: string;
   onChange: (value: string) => void;
 }
 
@@ -13,6 +14,7 @@ export function Input({
   label,
   error,
   optional,
+  optionalLabel,
   onChange,
   className = "",
   ...props
@@ -23,7 +25,7 @@ export function Input({
         {label}
         {optional && (
           <span className="ml-1 text-text-tertiary font-normal">
-            (optional)
+            {optionalLabel ?? "(optional)"}
           </span>
         )}
       </label>

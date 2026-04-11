@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { TrustCard } from "@/components/ui/TrustCard";
+import { t } from "@/lib/i18n";
 
 interface WelcomeProps {
   onStart: () => void;
@@ -27,15 +28,15 @@ export function Welcome({ onStart }: WelcomeProps) {
             </div>
 
             <h1 className="text-[1.25rem] font-extrabold leading-[1.2] tracking-[-0.02em] text-[#0B0F14] sm:text-[1.35rem]">
-              FC Real Pharma (Ukraine)
+              {t("welcome.club_name")}
             </h1>
 
             <p className="mt-2 text-[0.9375rem] font-bold leading-tight text-club-red">
-              Official Player Screening
+              {t("welcome.screening")}
             </p>
 
             <p className="mt-2.5 text-xs font-medium leading-snug text-text-tertiary">
-              Professional club&nbsp;&nbsp;|&nbsp;&nbsp;Ukrainian Second Division
+              {t("welcome.subtitle")}
             </p>
           </div>
         </div>
@@ -45,13 +46,13 @@ export function Welcome({ onStart }: WelcomeProps) {
         <TrustCard />
 
         <p className="mt-4 text-center text-[0.9375rem] leading-snug text-text-secondary">
-          Upload your profile and video for official review.
+          {t("welcome.upload_text")}
         </p>
       </main>
 
       <div className="mt-auto px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-1">
         <Button onClick={onStart} className="welcome-cta">
-          Start as a Player
+          {t("welcome.cta")}
         </Button>
       </div>
     </div>

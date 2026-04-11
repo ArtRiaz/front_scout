@@ -1,6 +1,13 @@
 "use client";
 
 import { STEPS, type Step } from "@/types";
+import { t, type TranslationKey } from "@/lib/i18n";
+
+const STEP_LABEL_KEYS: TranslationKey[] = [
+  "step.registration",
+  "step.video",
+  "step.payment",
+];
 
 interface ProgressBarProps {
   current: Step;
@@ -24,10 +31,10 @@ export function ProgressBar({ current }: ProgressBarProps) {
         ))}
       </div>
       <p className="text-xs text-text-tertiary">
-        Step {current + 1} of {STEPS.length}
+        {t("step.of", { current: current + 1, total: STEPS.length })}
         <span className="mx-1.5">·</span>
         <span className="text-text-secondary font-medium">
-          {STEPS[current].label}
+          {t(STEP_LABEL_KEYS[current])}
         </span>
       </p>
     </div>

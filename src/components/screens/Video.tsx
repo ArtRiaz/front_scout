@@ -6,12 +6,13 @@ import { StepLayout } from "@/components/layout/StepLayout";
 import { stageVideo } from "@/lib/api";
 import { getTelegramUserId } from "@/lib/telegram";
 import { ClubBadge } from "@/components/ui/ClubBadge";
+import { t } from "@/lib/i18n";
 
-const REQUIREMENTS = [
-  { icon: "⏱", text: "3–5 minutes of highlights" },
-  { icon: "📹", text: "Good video quality (720p or higher)" },
-  { icon: "⚽", text: "Show your best skills and moves" },
-  { icon: "🏟", text: "Real match or training footage" },
+const REQUIREMENTS = () => [
+  { icon: "⏱", text: t("video.req_duration") },
+  { icon: "📹", text: t("video.req_quality") },
+  { icon: "⚽", text: t("video.req_skills") },
+  { icon: "🏟", text: t("video.req_footage") },
 ];
 
 const MAX_SIZE_MB = 100;
@@ -35,19 +36,19 @@ export function Video() {
       "video/webm",
     ];
     if (!validTypes.includes(file.type)) {
-      setError("Please upload MP4, MOV, AVI, or WebM file");
+      setError(t("video.invalid_type"));
       return;
     }
 
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      setError(`File is too large. Maximum size is ${MAX_SIZE_MB}MB`);
+      setError(t("video.too_large", { size: MAX_SIZE_MB }));
       return;
     }
 
     (async () => {
       const tgId = getTelegramUserId();
       if (!tgId) {
-        setError("Please open this mini app from Telegram.");
+        setError(t("misc.open_from_tg"));
         return;
       }
 
@@ -57,7 +58,7 @@ export function Video() {
         setStagedVideo(res.video_id, file.name);
       } catch (e) {
         const message =
-          e instanceof Error ? e.message : "Could not upload video. Try again.";
+          e instanceof Error ? e.message : t("misc.something_wrong");
         setError(message);
         setStagedVideo(null);
       } finally {
@@ -72,10 +73,12 @@ export function Video() {
     handleFile(e.dataTransfer.files[0]);
   };
 
+  const reqs = REQUIREMENTS();
+
   return (
     <StepLayout
       step={1}
-      ctaLabel="Continue to Official Review"
+      ctaLabel={t("video.cta")}
       ctaDisabled={!stagedVideoId || isStaging}
       ctaLoading={isStaging}
       onCta={() => setStep(2)}
@@ -84,21 +87,19 @@ export function Video() {
         <ClubBadge />
         <section>
           <h2 className="text-2xl font-bold text-text-primary mb-2">
-            Upload Your Video
+            {t("video.title")}
           </h2>
           <p className="text-base text-text-secondary leading-relaxed">
-            Show us what you can do on the pitch. Upload a video of your best
-            moments.
+            {t("video.desc")}
           </p>
         </section>
 
-        {/* Requirements */}
         <section>
           <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide mb-3">
-            Video Requirements
+            {t("video.requirements")}
           </h3>
           <div className="space-y-2">
-            {REQUIREMENTS.map((req) => (
+            {reqs.map((req) => (
               <div
                 key={req.text}
                 className="flex items-center gap-3 bg-surface rounded-xl p-3.5 border border-border/50 shadow-sm"
@@ -110,7 +111,6 @@ export function Video() {
           </div>
         </section>
 
-        {/* Upload Zone */}
         <section>
           <input
             ref={fileRef}
@@ -154,10 +154,10 @@ export function Video() {
                 </div>
                 <div>
                   <p className="text-base font-semibold text-text-primary">
-                    Tap to upload video
+                    {t("video.tap_upload")}
                   </p>
                   <p className="text-sm text-text-tertiary mt-1">
-                    MP4, MOV, AVI, WebM · max {MAX_SIZE_MB}MB
+                    {t("video.formats")} · {t("video.max_size", { size: MAX_SIZE_MB })}
                   </p>
                 </div>
               </div>
@@ -185,7 +185,7 @@ export function Video() {
                     {stagedVideoName}
                   </p>
                   <p className="text-xs text-text-tertiary">
-                    Uploaded to server. Will be submitted after payment.
+                    {t("video.uploaded_note")}
                   </p>
                 </div>
                 <button

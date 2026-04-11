@@ -12,6 +12,7 @@ import {
   trackEvent,
 } from "@/lib/api";
 import { ClubBadge } from "@/components/ui/ClubBadge";
+import { t } from "@/lib/i18n";
 
 function defaultStarsForDisplay(): number {
   const raw = process.env.NEXT_PUBLIC_PAYMENT_STARS;
@@ -22,44 +23,46 @@ function defaultStarsForDisplay(): number {
   return 250;
 }
 
-const BENEFITS = [
-  {
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-      </svg>
-    ),
-    title: "Profile Review",
-    desc: "Your registration is reviewed by the club team",
-  },
-  {
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
-      </svg>
-    ),
-    title: "Video Review",
-    desc: "Your footage is reviewed as part of the screening process",
-  },
-  {
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    title: "Selection Decision",
-    desc: "You receive a clear next-step decision",
-  },
-  {
-    icon: (
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      </svg>
-    ),
-    title: "Official Submission",
-    desc: "Your application becomes officially submitted after payment",
-  },
-];
+function benefitsData() {
+  return [
+    {
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+        </svg>
+      ),
+      title: t("pay.benefit_profile"),
+      desc: t("pay.benefit_profile_desc"),
+    },
+    {
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
+        </svg>
+      ),
+      title: t("pay.benefit_video"),
+      desc: t("pay.benefit_video_desc"),
+    },
+    {
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      title: t("pay.benefit_decision"),
+      desc: t("pay.benefit_decision_desc"),
+    },
+    {
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+      ),
+      title: t("pay.benefit_submission"),
+      desc: t("pay.benefit_submission_desc"),
+    },
+  ];
+}
 
 export function Payment() {
   const {
@@ -86,13 +89,13 @@ export function Payment() {
       setError("");
 
       if (!stagedVideoId) {
-        setError("Please upload your video first.");
+        setError(t("pay.upload_first"));
         return;
       }
 
       const tgId = getTelegramUserId();
       if (!tgId) {
-        setError("Open this mini app from Telegram to continue.");
+        setError(t("pay.open_from_tg"));
         return;
       }
 
@@ -103,22 +106,22 @@ export function Payment() {
 
       const webapp = getWebApp();
       if (!webapp?.openInvoice) {
-        setError("Telegram invoice UI is not available.");
+        setError(t("pay.invoice_unavailable"));
         return;
       }
       if (!invoiceLink) {
-        setError("Invoice link is missing. Please try again.");
+        setError(t("pay.invoice_missing"));
         return;
       }
 
       try {
         const parsed = new URL(invoiceLink);
         if (parsed.protocol !== "https:") {
-          setError("Invalid invoice link protocol.");
+          setError(t("pay.invoice_invalid_protocol"));
           return;
         }
       } catch {
-        setError("Invalid invoice link format. Please try again.");
+        setError(t("pay.invoice_invalid_format"));
         return;
       }
 
@@ -144,9 +147,7 @@ export function Payment() {
 
       const status = await getStatus(tgId);
       if (!status.has_payment) {
-        setError(
-          "Payment not confirmed yet. If you don't have Stars, you can buy them with @PremiumBot."
-        );
+        setError(t("pay.not_confirmed"));
         return;
       }
 
@@ -163,7 +164,7 @@ export function Payment() {
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Something went wrong. Try again.";
+        err instanceof Error ? err.message : t("misc.something_wrong");
       setError(message);
     } finally {
       setSubmitting(false);
@@ -190,21 +191,24 @@ export function Payment() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-text-primary mb-2">
-            You&apos;re All Set!
+            {t("done.title")}
           </h2>
           <p className="text-base text-text-secondary max-w-xs leading-relaxed">
-            Your application has been officially submitted to FC Real Pharma.
-            Selected players will be contacted with next steps.
+            {t("done.desc_paid")}
           </p>
           <p className="text-sm text-text-tertiary mt-6">
-            You can close this window now.
+            {t("done.close")}
           </p>
         </div>
       </div>
     );
   }
 
-  const starsLabel = `Complete Submission — ${starsAmount} Star${starsAmount === 1 ? "" : "s"}`;
+  const starsLabel = t("pay.cta", {
+    amount: starsAmount,
+    s: starsAmount === 1 ? "" : "s",
+  });
+  const benefits = benefitsData();
 
   return (
     <StepLayout
@@ -224,7 +228,7 @@ export function Payment() {
               rel="noreferrer"
               className="mt-3 inline-flex h-10 items-center justify-center rounded-lg bg-accent/10 px-3 text-sm font-semibold text-accent hover:bg-accent/15 transition-colors"
             >
-              Buy Stars with @PremiumBot
+              {t("pay.buy_stars")}
             </a>
           </div>
         )}
@@ -233,10 +237,10 @@ export function Payment() {
 
         <section className="text-center pt-1">
           <h2 className="text-2xl font-bold text-text-primary mb-1">
-            Official Player Screening
+            {t("pay.title")}
           </h2>
           <p className="text-base text-text-secondary">
-            Official club review
+            {t("pay.subtitle")}
           </p>
         </section>
 
@@ -246,12 +250,11 @@ export function Payment() {
 
             <div className="p-5 space-y-4">
               <p className="text-sm text-text-secondary leading-relaxed">
-                Submit your profile and video for official review by FC Real Pharma.
-                Selected players move to the next stage of the screening process.
+                {t("pay.desc")}
               </p>
 
               <div className="space-y-3">
-                {BENEFITS.map((b) => (
+                {benefits.map((b) => (
                   <div key={b.title} className="flex items-start gap-3">
                     <div className="h-9 w-9 rounded-xl bg-accent/10 text-accent flex items-center justify-center flex-shrink-0 mt-0.5">
                       {b.icon}
@@ -276,11 +279,11 @@ export function Payment() {
                     {starsAmount}
                   </span>
                   <span className="text-base text-text-tertiary">
-                    Stars
+                    {t("pay.stars")}
                   </span>
                 </div>
                 <span className="text-xs text-text-tertiary">
-                  One-time review fee
+                  {t("pay.one_time_fee")}
                 </span>
               </div>
             </div>
@@ -302,7 +305,7 @@ export function Payment() {
                 d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
               />
             </svg>
-            <span className="text-sm">Secure payment via Telegram</span>
+            <span className="text-sm">{t("pay.secure")}</span>
           </div>
         </section>
       </div>
