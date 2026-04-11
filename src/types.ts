@@ -70,6 +70,11 @@ export const COUNTRIES = [
   "Rwanda",
   "Ethiopia",
   "Mozambique",
+  "Ukraine",
+  "Georgia",
+  "Israel",
+  "Kazakhstan",
+  "Uzbekistan",
   "Other",
 ] as const;
 

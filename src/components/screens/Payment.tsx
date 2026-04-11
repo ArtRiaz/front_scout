@@ -20,7 +20,7 @@ function defaultStarsForDisplay(): number {
     const n = Math.round(Number(raw));
     if (Number.isFinite(n) && n > 0) return n;
   }
-  return 250;
+  return 100;
 }
 
 function benefitsData() {
