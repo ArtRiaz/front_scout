@@ -101,7 +101,45 @@ export async function getStatus(telegramUserId: number) {
     has_payment: boolean;
     has_video: boolean;
     staged_video_id?: string | null;
+    social_flow_completed?: boolean;
   }>(`/api/status/${telegramUserId}`);
+}
+
+export async function getSocialConfig() {
+  return request<{
+    instagram_url: string;
+    telegram_channel_url: string;
+  }>("/api/social/config");
+}
+
+export async function confirmInstagram(telegramUserId: number) {
+  return request<{
+    instagram_done: boolean;
+    telegram_done: boolean;
+    all_done: boolean;
+  }>("/api/social/instagram/confirm", {
+    method: "POST",
+    body: JSON.stringify({ telegram_user_id: telegramUserId }),
+  });
+}
+
+export async function checkTelegram(telegramUserId: number) {
+  return request<{
+    instagram_done: boolean;
+    telegram_done: boolean;
+    all_done: boolean;
+  }>("/api/social/telegram/check", {
+    method: "POST",
+    body: JSON.stringify({ telegram_user_id: telegramUserId }),
+  });
+}
+
+export async function getSocialStatus(telegramUserId: number) {
+  return request<{
+    instagram_done: boolean;
+    telegram_done: boolean;
+    all_done: boolean;
+  }>(`/api/social/status/${telegramUserId}`);
 }
 
 export async function trackEvent(

@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { useFormStore } from "@/store/useFormStore";
 import { initTelegram, getWebApp, getTelegramUserId } from "@/lib/telegram";
 import { getStatus } from "@/lib/api";
-import { initLocale, t } from "@/lib/i18n";
+import { initLocale, getLocale, t } from "@/lib/i18n";
 import { Welcome } from "@/components/screens/Welcome";
 import { Registration } from "@/components/screens/Registration";
 import { Video } from "@/components/screens/Video";
 import { Payment } from "@/components/screens/Payment";
+import { SocialVerification } from "@/components/screens/SocialVerification";
 
 function FlowCompleteScreen() {
   return (
@@ -54,10 +55,12 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [statusLoadError, setStatusLoadError] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [isSocialFlow, setIsSocialFlow] = useState(false);
 
   useEffect(() => {
     initTelegram();
     initLocale();
+    setIsSocialFlow(getLocale() === "uk");
   }, []);
 
   useEffect(() => {
@@ -73,10 +76,15 @@ export default function Home() {
         const s = await getStatus(tgId);
         if (cancelled) return;
 
+        const socialFlow = getLocale() === "uk";
+        setIsSocialFlow(socialFlow);
+
         if (!s.has_registration) {
           setShowWelcome(true);
           setStep(0);
           setApplicationComplete(false);
+        } else if (socialFlow && s.social_flow_completed && s.has_video) {
+          setApplicationComplete(true);
         } else if (s.status === "video_uploaded" && s.has_payment) {
           setApplicationComplete(true);
         } else if (s.staged_video_id) {
@@ -180,7 +188,7 @@ export default function Home() {
     case 1:
       return <Video />;
     case 2:
-      return <Payment />;
+      return isSocialFlow ? <SocialVerification /> : <Payment />;
     default:
       return <Registration />;
   }

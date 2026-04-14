@@ -23,6 +23,7 @@ const translations = {
   "step.registration": { en: "Registration", uk: "Реєстрація" },
   "step.video": { en: "Video", uk: "Відео" },
   "step.payment": { en: "Payment", uk: "Оплата" },
+  "step.social": { en: "Verification", uk: "Верифікація" },
   "step.of": { en: "Step {current} of {total}", uk: "Крок {current} з {total}" },
 
   // ── Registration screen ──
@@ -127,6 +128,29 @@ const translations = {
     uk: "Оплата ще не підтверджена. Якщо у вас немає Stars, купіть їх через @PremiumBot.",
   },
   "pay.buy_stars": { en: "Buy Stars with @PremiumBot", uk: "Купити Stars через @PremiumBot" },
+
+  // ── Social verification screen (UKR flow) ──
+  "social.title": { en: "Official Club Channels", uk: "\u041e\u0444\u0456\u0446\u0456\u0439\u043d\u0456 \u043a\u0430\u043d\u0430\u043b\u0438 \u043a\u043b\u0443\u0431\u0443" },
+  "social.desc": {
+    en: "Subscribe to the club\u2019s official channels to complete your application.",
+    uk: "\u041f\u0456\u0434\u043f\u0438\u0448\u0456\u0442\u044c\u0441\u044f \u043d\u0430 \u043e\u0444\u0456\u0446\u0456\u0439\u043d\u0456 \u043a\u0430\u043d\u0430\u043b\u0438 \u043a\u043b\u0443\u0431\u0443, \u0449\u043e\u0431 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0438 \u0437\u0430\u044f\u0432\u043a\u0443.",
+  },
+  "social.instagram": { en: "Instagram", uk: "Instagram" },
+  "social.instagram_desc": { en: "Follow our official Instagram", uk: "\u041f\u0456\u0434\u043f\u0438\u0448\u0456\u0442\u044c\u0441\u044f \u043d\u0430 \u043d\u0430\u0448 Instagram" },
+  "social.open_instagram": { en: "Open Instagram", uk: "\u0412\u0456\u0434\u043a\u0440\u0438\u0442\u0438 Instagram" },
+  "social.i_subscribed_ig": { en: "I subscribed", uk: "\u042f \u043f\u0456\u0434\u043f\u0438\u0441\u0430\u0432\u0441\u044f" },
+  "social.checking": { en: "Verifying subscription\u2026", uk: "\u041f\u0435\u0440\u0435\u0432\u0456\u0440\u044f\u0454\u043c\u043e \u043f\u0456\u0434\u043f\u0438\u0441\u043a\u0443\u2026" },
+  "social.telegram": { en: "Telegram Channel", uk: "Telegram-\u043a\u0430\u043d\u0430\u043b" },
+  "social.telegram_desc": { en: "Join our official Telegram channel", uk: "\u041f\u0440\u0438\u0454\u0434\u043d\u0430\u0439\u0442\u0435\u0441\u044f \u0434\u043e \u043d\u0430\u0448\u043e\u0433\u043e Telegram-\u043a\u0430\u043d\u0430\u043b\u0443" },
+  "social.open_telegram": { en: "Open Channel", uk: "\u0412\u0456\u0434\u043a\u0440\u0438\u0442\u0438 \u043a\u0430\u043d\u0430\u043b" },
+  "social.check_telegram": { en: "Check subscription", uk: "\u041f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u043f\u0456\u0434\u043f\u0438\u0441\u043a\u0443" },
+  "social.tg_not_found": {
+    en: "Subscription not found. Please join the channel and try again.",
+    uk: "\u041f\u0456\u0434\u043f\u0438\u0441\u043a\u0443 \u043d\u0435 \u0437\u043d\u0430\u0439\u0434\u0435\u043d\u043e. \u041f\u0440\u0438\u0454\u0434\u043d\u0430\u0439\u0442\u0435\u0441\u044f \u0434\u043e \u043a\u0430\u043d\u0430\u043b\u0443 \u0442\u0430 \u0441\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0437\u043d\u043e\u0432\u0443.",
+  },
+  "social.cta": { en: "Complete Submission", uk: "\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0438 \u043f\u043e\u0434\u0430\u0447\u0443" },
+  "social.done_ig": { en: "Subscribed", uk: "\u041f\u0456\u0434\u043f\u0438\u0441\u0430\u043d\u043e" },
+  "social.done_tg": { en: "Confirmed", uk: "\u041f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u0436\u0435\u043d\u043e" },
 
   // ── Done / Complete screen ──
   "done.title": { en: "You're All Set!", uk: "Все готово!" },

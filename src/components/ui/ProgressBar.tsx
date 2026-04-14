@@ -11,9 +11,10 @@ const STEP_LABEL_KEYS: TranslationKey[] = [
 
 interface ProgressBarProps {
   current: Step;
+  stepLabelOverride?: string;
 }
 
-export function ProgressBar({ current }: ProgressBarProps) {
+export function ProgressBar({ current, stepLabelOverride }: ProgressBarProps) {
   return (
     <div className="w-full">
       <div className="flex items-center gap-1 mb-2">
@@ -34,7 +35,7 @@ export function ProgressBar({ current }: ProgressBarProps) {
         {t("step.of", { current: current + 1, total: STEPS.length })}
         <span className="mx-1.5">·</span>
         <span className="text-text-secondary font-medium">
-          {t(STEP_LABEL_KEYS[current])}
+          {stepLabelOverride ?? t(STEP_LABEL_KEYS[current])}
         </span>
       </p>
     </div>

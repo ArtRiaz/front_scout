@@ -12,6 +12,7 @@ interface StepLayoutProps {
   ctaDisabled?: boolean;
   ctaLoading?: boolean;
   onCta: () => void;
+  stepLabelOverride?: string;
 }
 
 export function StepLayout({
@@ -21,11 +22,12 @@ export function StepLayout({
   ctaDisabled,
   ctaLoading,
   onCta,
+  stepLabelOverride,
 }: StepLayoutProps) {
   return (
     <div className="flex flex-col min-h-[100dvh]">
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md px-5 pt-4 pb-3">
-        <ProgressBar current={step} />
+        <ProgressBar current={step} stepLabelOverride={stepLabelOverride} />
       </header>
 
       <main className="flex-1 px-5 pb-28 step-enter">{children}</main>
