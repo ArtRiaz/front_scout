@@ -44,23 +44,31 @@ function FlowCompleteScreen() {
   );
 }
 
-function isMultiFlowEnabled(): boolean {
+/**
+ * Determine whether to use social verification flow.
+ *
+ * Priority:
+ * 1. URL ?flow=payment → always payment
+ * 2. URL ?flow=social  → always social verification
+ * 3. ENV NEXT_PUBLIC_ENABLE_MULTI_FLOW=true + locale uk → social
+ * 4. Otherwise → payment
+ */
+function shouldUseSocialFlow(): boolean {
+  if (typeof window !== "undefined") {
+    const forcedFlow = new URLSearchParams(window.location.search)
+      .get("flow")
+      ?.trim()
+      .toLowerCase();
+    if (forcedFlow === "payment") return false;
+    if (forcedFlow === "social") return true;
+  }
+
   const envEnabled =
     String(process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW ?? "")
       .trim()
       .toLowerCase() === "true";
 
-  if (typeof window === "undefined") return envEnabled;
-
-  const forcedFlow = new URLSearchParams(window.location.search)
-    .get("flow")
-    ?.trim()
-    .toLowerCase();
-
-  if (forcedFlow === "payment") return false;
-  if (forcedFlow === "multi") return true;
-
-  return envEnabled;
+  return envEnabled && getLocale() === "uk";
 }
 
 export default function Home() {
@@ -79,8 +87,7 @@ export default function Home() {
   useEffect(() => {
     initTelegram();
     initLocale();
-    const multiFlow = isMultiFlowEnabled();
-    setIsSocialFlow(multiFlow && getLocale() === "uk");
+    setIsSocialFlow(shouldUseSocialFlow());
   }, []);
 
   useEffect(() => {
@@ -96,8 +103,7 @@ export default function Home() {
         const s = await getStatus(tgId);
         if (cancelled) return;
 
-        const multiFlow = isMultiFlowEnabled();
-        const socialFlow = multiFlow && getLocale() === "uk";
+        const socialFlow = shouldUseSocialFlow();
         setIsSocialFlow(socialFlow);
 
         if (!s.has_registration) {

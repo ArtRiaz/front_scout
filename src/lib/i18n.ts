@@ -212,6 +212,14 @@ export function getLocale(): Locale {
 }
 
 export function initLocale() {
+  if (typeof window !== "undefined") {
+    const forced = new URLSearchParams(window.location.search).get("force_locale")?.trim().toLowerCase();
+    if (forced === "en" || forced === "uk") {
+      currentLocale = forced;
+      return;
+    }
+  }
+
   const webapp = typeof window !== "undefined" ? window.Telegram?.WebApp : null;
   const langCode = webapp?.initDataUnsafe?.user?.language_code;
   currentLocale = detectLocale(langCode);
