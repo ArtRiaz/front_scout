@@ -44,6 +44,25 @@ function FlowCompleteScreen() {
   );
 }
 
+function isMultiFlowEnabled(): boolean {
+  const envEnabled =
+    String(process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW ?? "")
+      .trim()
+      .toLowerCase() === "true";
+
+  if (typeof window === "undefined") return envEnabled;
+
+  const forcedFlow = new URLSearchParams(window.location.search)
+    .get("flow")
+    ?.trim()
+    .toLowerCase();
+
+  if (forcedFlow === "payment") return false;
+  if (forcedFlow === "multi") return true;
+
+  return envEnabled;
+}
+
 export default function Home() {
   const {
     step,
@@ -60,7 +79,7 @@ export default function Home() {
   useEffect(() => {
     initTelegram();
     initLocale();
-    const multiFlow = process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW === "true";
+    const multiFlow = isMultiFlowEnabled();
     setIsSocialFlow(multiFlow && getLocale() === "uk");
   }, []);
 
@@ -77,7 +96,7 @@ export default function Home() {
         const s = await getStatus(tgId);
         if (cancelled) return;
 
-        const multiFlow = process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW === "true";
+        const multiFlow = isMultiFlowEnabled();
         const socialFlow = multiFlow && getLocale() === "uk";
         setIsSocialFlow(socialFlow);
 
