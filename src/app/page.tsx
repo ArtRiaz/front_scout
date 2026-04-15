@@ -60,7 +60,8 @@ export default function Home() {
   useEffect(() => {
     initTelegram();
     initLocale();
-    setIsSocialFlow(getLocale() === "uk");
+    const multiFlow = process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW === "true";
+    setIsSocialFlow(multiFlow && getLocale() === "uk");
   }, []);
 
   useEffect(() => {
@@ -76,7 +77,8 @@ export default function Home() {
         const s = await getStatus(tgId);
         if (cancelled) return;
 
-        const socialFlow = getLocale() === "uk";
+        const multiFlow = process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW === "true";
+        const socialFlow = multiFlow && getLocale() === "uk";
         setIsSocialFlow(socialFlow);
 
         if (!s.has_registration) {
