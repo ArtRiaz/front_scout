@@ -20,7 +20,6 @@ const nextConfig: NextConfig = {
    */
   env: {
     NEXT_PUBLIC_API_PROXY_ORIGIN: apiProxyOrigin ?? "",
-    NEXT_PUBLIC_ENABLE_MULTI_FLOW: process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW ?? "false",
   },
   async rewrites() {
     if (!apiProxyOrigin) return [];

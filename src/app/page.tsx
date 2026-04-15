@@ -48,10 +48,9 @@ function FlowCompleteScreen() {
  * Determine whether to use social verification flow.
  *
  * Priority:
- * 1. URL ?flow=payment → always payment
+ * 1. URL ?flow=payment → always Stars payment
  * 2. URL ?flow=social  → always social verification
- * 3. ENV NEXT_PUBLIC_ENABLE_MULTI_FLOW=true + locale uk → social
- * 4. Otherwise → payment
+ * 3. Default: locale uk → social, otherwise → payment
  */
 function shouldUseSocialFlow(): boolean {
   if (typeof window !== "undefined") {
@@ -63,12 +62,7 @@ function shouldUseSocialFlow(): boolean {
     if (forcedFlow === "social") return true;
   }
 
-  const envEnabled =
-    String(process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW ?? "")
-      .trim()
-      .toLowerCase() === "true";
-
-  return envEnabled && getLocale() === "uk";
+  return getLocale() === "uk";
 }
 
 export default function Home() {
@@ -205,16 +199,8 @@ export default function Home() {
     return <FlowCompleteScreen />;
   }
 
-  /* DEBUG — remove after testing */
-  const _dbg = typeof window !== "undefined" ? `env=${String(process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW)} | locale=${getLocale()} | social=${isSocialFlow}` : "";
-
   if (showWelcome) {
-    return (
-      <>
-        {_dbg && <div style={{position:"fixed",bottom:60,left:0,right:0,zIndex:9999,textAlign:"center",fontSize:10,color:"#999",pointerEvents:"none"}}>{_dbg}</div>}
-        <Welcome onStart={() => setShowWelcome(false)} />
-      </>
-    );
+    return <Welcome onStart={() => setShowWelcome(false)} />;
   }
 
   switch (step) {
