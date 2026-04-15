@@ -199,22 +199,8 @@ export default function Home() {
     return <FlowCompleteScreen />;
   }
 
-  /* DEBUG — удалить после диагностики */
-  const _dbgUrl = typeof window !== "undefined" ? window.location.href : "";
-  const _dbgSearch = typeof window !== "undefined" ? window.location.search : "";
-  const _dbgFlow = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("flow") : "";
-  const _dbg = `search=${_dbgSearch} | flow=${_dbgFlow} | locale=${getLocale()} | social=${isSocialFlow}`;
-
   if (showWelcome) {
-    return (
-      <>
-        <div style={{position:"fixed",top:0,left:0,right:0,zIndex:9999,background:"#000",color:"#0f0",fontSize:9,padding:4,wordBreak:"break-all",pointerEvents:"none"}}>
-          <div>{_dbgUrl}</div>
-          <div>{_dbg}</div>
-        </div>
-        <Welcome onStart={() => setShowWelcome(false)} />
-      </>
-    );
+    return <Welcome onStart={() => setShowWelcome(false)} />;
   }
 
   switch (step) {
