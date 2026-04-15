@@ -205,8 +205,16 @@ export default function Home() {
     return <FlowCompleteScreen />;
   }
 
+  /* DEBUG — remove after testing */
+  const _dbg = typeof window !== "undefined" ? `env=${String(process.env.NEXT_PUBLIC_ENABLE_MULTI_FLOW)} | locale=${getLocale()} | social=${isSocialFlow}` : "";
+
   if (showWelcome) {
-    return <Welcome onStart={() => setShowWelcome(false)} />;
+    return (
+      <>
+        {_dbg && <div style={{position:"fixed",bottom:60,left:0,right:0,zIndex:9999,textAlign:"center",fontSize:10,color:"#999",pointerEvents:"none"}}>{_dbg}</div>}
+        <Welcome onStart={() => setShowWelcome(false)} />
+      </>
+    );
   }
 
   switch (step) {
