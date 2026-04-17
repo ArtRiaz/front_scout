@@ -6,7 +6,7 @@ import { StepLayout } from "@/components/layout/StepLayout";
 import { stageVideo } from "@/lib/api";
 import { getTelegramUserId } from "@/lib/telegram";
 import { ClubBadge } from "@/components/ui/ClubBadge";
-import { t } from "@/lib/i18n";
+import { getLocale, t } from "@/lib/i18n";
 
 const REQUIREMENTS = () => [
   { icon: "⏱", text: t("video.req_duration") },
@@ -74,12 +74,13 @@ export function Video() {
   };
 
   const reqs = REQUIREMENTS();
+  const isUkrFlow = getLocale() === "uk";
 
   return (
     <StepLayout
       step={1}
       ctaLabel={t("video.cta")}
-      ctaDisabled={!stagedVideoId || isStaging}
+      ctaDisabled={isUkrFlow ? isStaging : !stagedVideoId || isStaging}
       ctaLoading={isStaging}
       onCta={() => setStep(2)}
     >

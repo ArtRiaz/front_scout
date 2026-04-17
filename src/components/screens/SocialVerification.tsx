@@ -111,13 +111,17 @@ export function SocialVerification() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!allDone || !stagedVideoId) return;
+    if (!allDone) return;
     const tgId = getTelegramUserId();
     if (!tgId) return;
     try {
       setError("");
       setSubmitting(true);
-      await submitVideo(tgId, stagedVideoId);
+      if (stagedVideoId) {
+        await submitVideo(tgId, stagedVideoId);
+      } else {
+        await trackEvent(tgId, "social_submitted_without_video");
+      }
       setApplicationComplete(true);
       const webapp = getWebApp();
       if (webapp?.close) setTimeout(() => webapp.close(), 1200);

@@ -104,7 +104,7 @@ export default function Home() {
           setShowWelcome(true);
           setStep(0);
           setApplicationComplete(false);
-        } else if (socialFlow && s.social_flow_completed && s.has_video) {
+        } else if (socialFlow && s.social_flow_completed) {
           setApplicationComplete(true);
         } else if (s.status === "video_uploaded" && s.has_payment) {
           setApplicationComplete(true);
