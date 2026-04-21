@@ -1,6 +1,17 @@
 import { create } from "zustand";
 import type { FormData, Step } from "@/types";
 
+export type FlowKind = "player" | "agent";
+export type AgentSubStep = "register" | "summary";
+
+export interface AgentProfileSnapshot {
+  firstName: string;
+  lastName: string;
+  country: string;
+  agentRole: string;
+  playersAdded: number;
+}
+
 interface FormStore {
   step: Step;
   form: FormData;
@@ -9,11 +20,18 @@ interface FormStore {
   isSubmitting: boolean;
   /** Set when user already finished video submit + payment (resume shows thank-you). */
   applicationComplete: boolean;
+  /** Player vs agent onboarding (agent is EN-only in UI). */
+  flowKind: FlowKind;
+  agentSubStep: AgentSubStep;
+  agentProfile: AgentProfileSnapshot | null;
   setStep: (step: Step) => void;
   updateForm: (field: keyof FormData, value: string | boolean) => void;
   setStagedVideo: (videoId: string | null, videoName?: string) => void;
   setSubmitting: (v: boolean) => void;
   setApplicationComplete: (v: boolean) => void;
+  setFlowKind: (k: FlowKind) => void;
+  setAgentSubStep: (s: AgentSubStep) => void;
+  setAgentProfile: (p: AgentProfileSnapshot | null) => void;
   reset: () => void;
 }
 
@@ -41,6 +59,9 @@ export const useFormStore = create<FormStore>((set) => ({
   stagedVideoName: "",
   isSubmitting: false,
   applicationComplete: false,
+  flowKind: "player",
+  agentSubStep: "register",
+  agentProfile: null,
 
   setStep: (step) => set({ step }),
 
@@ -59,6 +80,12 @@ export const useFormStore = create<FormStore>((set) => ({
 
   setApplicationComplete: (v) => set({ applicationComplete: v }),
 
+  setFlowKind: (k) => set({ flowKind: k }),
+
+  setAgentSubStep: (s) => set({ agentSubStep: s }),
+
+  setAgentProfile: (p) => set({ agentProfile: p }),
+
   reset: () =>
     set({
       step: 0,
@@ -67,5 +94,8 @@ export const useFormStore = create<FormStore>((set) => ({
       stagedVideoName: "",
       isSubmitting: false,
       applicationComplete: false,
+      flowKind: "player",
+      agentSubStep: "register",
+      agentProfile: null,
     }),
 }));

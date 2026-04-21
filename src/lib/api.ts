@@ -102,7 +102,43 @@ export async function getStatus(telegramUserId: number) {
     has_video: boolean;
     staged_video_id?: string | null;
     social_flow_completed?: boolean;
+    has_agent_registration?: boolean;
   }>(`/api/status/${telegramUserId}`);
+}
+
+export async function registerAgent(data: {
+  telegram_user_id: number;
+  first_name: string;
+  last_name: string;
+  country: string;
+  agent_role: "agent" | "scout" | "academy";
+}) {
+  return request<{
+    id: string;
+    user_id: string;
+    first_name: string;
+    last_name: string;
+    country: string;
+    agent_role: string;
+    players_count: number;
+    created_at: string;
+  }>("/api/agent/register", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getAgentProfile(telegramUserId: number) {
+  return request<{
+    id: string;
+    user_id: string;
+    first_name: string;
+    last_name: string;
+    country: string;
+    agent_role: string;
+    players_count: number;
+    created_at: string;
+  }>(`/api/agent/profile/${telegramUserId}`);
 }
 
 export async function getSocialConfig() {

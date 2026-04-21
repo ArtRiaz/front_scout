@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import { useFormStore } from "@/store/useFormStore";
 import { initTelegram, getWebApp, getTelegramUserId } from "@/lib/telegram";
-import { getStatus } from "@/lib/api";
+import { getAgentProfile, getStatus } from "@/lib/api";
 import { initLocale, getLocale, t } from "@/lib/i18n";
 import { Welcome } from "@/components/screens/Welcome";
 import { Registration } from "@/components/screens/Registration";
 import { Video } from "@/components/screens/Video";
 import { Payment } from "@/components/screens/Payment";
 import { SocialVerification } from "@/components/screens/SocialVerification";
+import { AgentRegistration } from "@/components/screens/AgentRegistration";
+import { AgentMiniSummary } from "@/components/screens/AgentMiniSummary";
 
 function FlowCompleteScreen() {
   return (
@@ -72,6 +74,11 @@ export default function Home() {
     setStagedVideo,
     setApplicationComplete,
     applicationComplete,
+    flowKind,
+    agentSubStep,
+    setFlowKind,
+    setAgentSubStep,
+    setAgentProfile,
   } = useFormStore();
   const [hydrated, setHydrated] = useState(false);
   const [statusLoadError, setStatusLoadError] = useState<string | null>(null);
@@ -100,21 +107,46 @@ export default function Home() {
         const socialFlow = shouldUseSocialFlow();
         setIsSocialFlow(socialFlow);
 
-        if (!s.has_registration) {
+        if (s.has_registration) {
+          if (socialFlow && s.social_flow_completed) {
+            setApplicationComplete(true);
+          } else if (s.status === "video_uploaded" && s.has_payment) {
+            setApplicationComplete(true);
+          } else if (s.staged_video_id) {
+            setStagedVideo(String(s.staged_video_id), "Your video");
+            setApplicationComplete(false);
+            setStep(2);
+          } else {
+            setApplicationComplete(false);
+            setStep(1);
+          }
+          setShowWelcome(false);
+        } else if (s.has_agent_registration && getLocale() === "en") {
+          try {
+            const p = await getAgentProfile(tgId);
+            if (cancelled) return;
+            setAgentProfile({
+              firstName: p.first_name,
+              lastName: p.last_name,
+              country: p.country,
+              agentRole: p.agent_role,
+              playersAdded: p.players_count,
+            });
+            setFlowKind("agent");
+            setAgentSubStep("summary");
+            setShowWelcome(false);
+            setApplicationComplete(false);
+          } catch {
+            if (!cancelled) {
+              setShowWelcome(true);
+              setStep(0);
+              setApplicationComplete(false);
+            }
+          }
+        } else {
           setShowWelcome(true);
           setStep(0);
           setApplicationComplete(false);
-        } else if (socialFlow && s.social_flow_completed) {
-          setApplicationComplete(true);
-        } else if (s.status === "video_uploaded" && s.has_payment) {
-          setApplicationComplete(true);
-        } else if (s.staged_video_id) {
-          setStagedVideo(String(s.staged_video_id), "Your video");
-          setApplicationComplete(false);
-          setStep(2);
-        } else {
-          setApplicationComplete(false);
-          setStep(1);
         }
       } catch (e) {
         if (!cancelled) {
@@ -130,7 +162,14 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [setStep, setStagedVideo, setApplicationComplete]);
+  }, [
+    setStep,
+    setStagedVideo,
+    setApplicationComplete,
+    setFlowKind,
+    setAgentSubStep,
+    setAgentProfile,
+  ]);
 
   useEffect(() => {
     const webapp = getWebApp();
@@ -141,23 +180,45 @@ export default function Home() {
       return;
     }
 
-    if (step > 0 || (step === 0 && !showWelcome)) {
-      webapp.BackButton.show();
-      const handleBack = () => {
-        if (step === 0 && !showWelcome) {
-          setShowWelcome(true);
-        } else {
-          setStep((step - 1) as 0 | 1);
-        }
-      };
-      webapp.BackButton.onClick(handleBack);
-      return () => {
-        webapp.BackButton.offClick(handleBack);
-      };
-    } else {
+    if (showWelcome) {
       webapp.BackButton.hide();
+      return;
     }
-  }, [step, setStep, applicationComplete, showWelcome]);
+
+    webapp.BackButton.show();
+    const handleBack = () => {
+      if (flowKind === "agent") {
+        if (agentSubStep === "summary") {
+          setAgentSubStep("register");
+        } else {
+          setShowWelcome(true);
+          setFlowKind("player");
+          setAgentSubStep("register");
+          setAgentProfile(null);
+        }
+        return;
+      }
+      if (step === 0 && !showWelcome) {
+        setShowWelcome(true);
+      } else {
+        setStep((step - 1) as 0 | 1);
+      }
+    };
+    webapp.BackButton.onClick(handleBack);
+    return () => {
+      webapp.BackButton.offClick(handleBack);
+    };
+  }, [
+    step,
+    setStep,
+    applicationComplete,
+    showWelcome,
+    flowKind,
+    agentSubStep,
+    setAgentSubStep,
+    setFlowKind,
+    setAgentProfile,
+  ]);
 
   if (!hydrated) {
     return (
@@ -202,10 +263,25 @@ export default function Home() {
   if (showWelcome) {
     return (
       <Welcome
-        onStartPlayer={() => setShowWelcome(false)}
-        onStartAgent={() => setShowWelcome(false)}
+        onStartPlayer={() => {
+          setFlowKind("player");
+          setShowWelcome(false);
+        }}
+        onStartAgent={() => {
+          setFlowKind("agent");
+          setAgentSubStep("register");
+          setAgentProfile(null);
+          setShowWelcome(false);
+        }}
       />
     );
+  }
+
+  if (flowKind === "agent") {
+    if (agentSubStep === "register") {
+      return <AgentRegistration />;
+    }
+    return <AgentMiniSummary />;
   }
 
   switch (step) {

@@ -15,6 +15,50 @@ const translations = {
   "welcome.cta": { en: "Start as a Player", uk: "Почати як гравець" },
   "welcome.cta_agent": { en: "Start for agents", uk: "Почати як гравець" },
 
+  // ── Agent flow (EN UI; uk strings are fallbacks, agent screens are not shown for uk) ──
+  "agent.title": { en: "Agent registration", uk: "Реєстрація агента" },
+  "agent.subtitle": {
+    en: "Tell us who you represent before adding players.",
+    uk: "Хто ви представляєте перед додаванням гравців.",
+  },
+  "agent.step.register": { en: "Agent registration", uk: "Реєстрація агента" },
+  "agent.step.summary": { en: "Summary", uk: "Підсумок" },
+  "agent.first_name": { en: "First name", uk: "Ім'я" },
+  "agent.last_name": { en: "Last name", uk: "Прізвище" },
+  "agent.country": { en: "Country", uk: "Країна" },
+  "agent.status": { en: "Status", uk: "Статус" },
+  "agent.status_placeholder": { en: "Select", uk: "Обрати" },
+  "agent.role.agent": { en: "Agent", uk: "Агент" },
+  "agent.role.scout": { en: "Scout", uk: "Скаут" },
+  "agent.role.academy": { en: "Academy", uk: "Академія" },
+  "agent.cta.register": { en: "Continue", uk: "Продовжити" },
+  "agent.cta.summary": { en: "Continue", uk: "Продовжити" },
+  "agent.val.first_name": { en: "First name is required", uk: "Вкажіть ім'я" },
+  "agent.val.last_name": { en: "Last name is required", uk: "Вкажіть прізвище" },
+  "agent.val.country": { en: "Country is required", uk: "Оберіть країну" },
+  "agent.val.role": { en: "Select your status", uk: "Оберіть статус" },
+  "agent.en_only": {
+    en: "Agent flow is available in English only.",
+    uk: "Флоу агента доступний лише англійською.",
+  },
+  "agent.summary.title": { en: "You're registered", uk: "Ви зареєстровані" },
+  "agent.summary.subtitle": {
+    en: "Review your details before adding players.",
+    uk: "Перевірте дані перед додаванням гравців.",
+  },
+  "agent.summary.agent": { en: "Agent", uk: "Агент" },
+  "agent.summary.country": { en: "Country", uk: "Країна" },
+  "agent.summary.status": { en: "Status", uk: "Статус" },
+  "agent.summary.players_added": { en: "Players added", uk: "Гравців додано" },
+  "agent.missing_profile": {
+    en: "Profile not loaded. Go back and try again.",
+    uk: "Профіль не завантажено. Поверніться та спробуйте знову.",
+  },
+  "agent.next_phase_hint": {
+    en: "Next: add your players (coming in the next step).",
+    uk: "Далі: додавання гравців (наступний крок).",
+  },
+
   // ── Trust card ──
   "trust.official": { en: "Official club process", uk: "Офіційний процес клубу" },
   "trust.real_review": { en: "Real club review", uk: "Реальний розгляд клубом" },

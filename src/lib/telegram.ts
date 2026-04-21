@@ -51,6 +51,7 @@ interface TelegramWebApp {
   viewportStableHeight: number;
   isExpanded: boolean;
   platform: string;
+  showAlert?: (message: string) => void;
 }
 
 declare global {
