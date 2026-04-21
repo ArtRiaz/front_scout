@@ -59,7 +59,11 @@ export function Welcome({ onStartPlayer, onStartAgent }: WelcomeProps) {
             <Button onClick={onStartPlayer} className="welcome-cta">
               {t("welcome.cta")}
             </Button>
-            <Button variant="secondary" onClick={onStartAgent}>
+            <Button
+              variant="secondary"
+              onClick={onStartAgent}
+              className="border-brand/50 bg-brand/5 text-brand hover:bg-brand/10"
+            >
               {t("welcome.cta_agent")}
             </Button>
           </div>
