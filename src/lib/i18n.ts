@@ -13,6 +13,7 @@ const translations = {
   "welcome.subtitle": { en: "Professional club  |  Ukrainian Second Division", uk: "Професійний клуб  |  Друга ліга України" },
   "welcome.upload_text": { en: "Upload your profile and video for official review.", uk: "Надішліть свій профіль та відео для офіційного розгляду." },
   "welcome.cta": { en: "Start as a Player", uk: "Почати як гравець" },
+  "welcome.cta_agent": { en: "Start for agents", uk: "Почати як гравець" },
 
   // ── Trust card ──
   "trust.official": { en: "Official club process", uk: "Офіційний процес клубу" },

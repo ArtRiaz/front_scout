@@ -3,13 +3,16 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { TrustCard } from "@/components/ui/TrustCard";
-import { t } from "@/lib/i18n";
+import { getLocale, t } from "@/lib/i18n";
 
 interface WelcomeProps {
-  onStart: () => void;
+  onStartPlayer: () => void;
+  onStartAgent: () => void;
 }
 
-export function Welcome({ onStart }: WelcomeProps) {
+export function Welcome({ onStartPlayer, onStartAgent }: WelcomeProps) {
+  const isEnglish = getLocale() === "en";
+
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="relative w-full overflow-hidden bg-surface shadow-[0_1px_0_0_var(--color-border)]">
@@ -51,9 +54,20 @@ export function Welcome({ onStart }: WelcomeProps) {
       </main>
 
       <div className="mt-auto px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-1">
-        <Button onClick={onStart} className="welcome-cta">
-          {t("welcome.cta")}
-        </Button>
+        {isEnglish ? (
+          <div className="flex flex-col gap-3">
+            <Button onClick={onStartPlayer} className="welcome-cta">
+              {t("welcome.cta")}
+            </Button>
+            <Button variant="secondary" onClick={onStartAgent}>
+              {t("welcome.cta_agent")}
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={onStartPlayer} className="welcome-cta">
+            {t("welcome.cta")}
+          </Button>
+        )}
       </div>
     </div>
   );

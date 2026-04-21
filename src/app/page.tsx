@@ -200,7 +200,12 @@ export default function Home() {
   }
 
   if (showWelcome) {
-    return <Welcome onStart={() => setShowWelcome(false)} />;
+    return (
+      <Welcome
+        onStartPlayer={() => setShowWelcome(false)}
+        onStartAgent={() => setShowWelcome(false)}
+      />
+    );
   }
 
   switch (step) {
