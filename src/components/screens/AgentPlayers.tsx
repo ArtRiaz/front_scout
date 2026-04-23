@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { StepLayout } from "@/components/layout/StepLayout";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -18,6 +18,18 @@ const DOMINANT_FEET = [
   { value: "both", label: t("foot.both") },
 ] as const;
 
+const MAX_VIDEO_MB = 250;
+const ACCEPTED_VIDEO = [
+  "video/mp4",
+  "video/quicktime",
+  "video/x-msvideo",
+  "video/webm",
+];
+
+function formatSizeMb(bytes: number): string {
+  return (bytes / (1024 * 1024)).toFixed(1);
+}
+
 export function AgentPlayers() {
   const { agentProfile, setAgentProfile, setAgentSubStep } = useFormStore();
   const [firstName, setFirstName] = useState("");
@@ -33,6 +45,7 @@ export function AgentPlayers() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const playersAdded = agentProfile?.playersAdded ?? 0;
   const canContinue = playersAdded >= 2;
@@ -56,6 +69,28 @@ export function AgentPlayers() {
     setFile(null);
     setErrors({});
     setSubmitError("");
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const pickFile = (picked: File | undefined) => {
+    if (!picked) return;
+    setSubmitError("");
+    if (picked.type && !ACCEPTED_VIDEO.includes(picked.type)) {
+      setErrors((e) => ({ ...e, file: t("video.invalid_type") }));
+      return;
+    }
+    if (picked.size > MAX_VIDEO_MB * 1024 * 1024) {
+      setErrors((e) => ({
+        ...e,
+        file: t("video.too_large", { size: MAX_VIDEO_MB }),
+      }));
+      return;
+    }
+    setErrors((e) => {
+      const { file: _omit, ...rest } = e;
+      return rest;
+    });
+    setFile(picked);
   };
 
   const validate = () => {
@@ -102,9 +137,15 @@ export function AgentPlayers() {
       }
       resetForm();
     } catch (err) {
-      setSubmitError(
-        err instanceof Error ? err.message : t("misc.something_wrong"),
-      );
+      const raw = err instanceof Error ? err.message : "";
+      const lower = raw.toLowerCase();
+      let message = raw || t("misc.something_wrong");
+      if (lower.includes("load failed") || lower.includes("failed to fetch")) {
+        message = t("agent.players.err.network");
+      } else if (lower.includes("413") || lower.includes("too large")) {
+        message = t("video.too_large", { size: MAX_VIDEO_MB });
+      }
+      setSubmitError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -133,10 +174,16 @@ export function AgentPlayers() {
     >
       <div className="space-y-5">
         <ClubBadge />
+
         <div className="rounded-2xl border border-border bg-surface p-4">
-          <h2 className="text-lg font-bold text-text-primary">{t("agent.players.title")}</h2>
-          <p className="mt-1 text-sm text-text-secondary">{t("agent.players.subtitle")}</p>
+          <h2 className="text-lg font-bold text-text-primary">
+            {t("agent.players.title")}
+          </h2>
+          <p className="mt-1 text-sm text-text-secondary">
+            {t("agent.players.subtitle")}
+          </p>
         </div>
+
         <div className="rounded-2xl border border-border bg-surface p-4">
           <p className="text-sm text-text-secondary">
             {t("agent.players.added")}:{" "}
@@ -157,29 +204,172 @@ export function AgentPlayers() {
 
         {canAddMore ? (
           <>
-            <Input label={t("agent.first_name")} value={firstName} onChange={setFirstName} error={errors.first_name} />
-            <Input label={t("agent.last_name")} value={lastName} onChange={setLastName} error={errors.last_name} />
+            <Input
+              label={t("agent.first_name")}
+              value={firstName}
+              onChange={setFirstName}
+              error={errors.first_name}
+            />
+            <Input
+              label={t("agent.last_name")}
+              value={lastName}
+              onChange={setLastName}
+              error={errors.last_name}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <Input label={t("reg.height")} value={heightCm} onChange={setHeightCm} error={errors.height_cm} type="number" />
-              <Input label={t("reg.weight")} value={weightKg} onChange={setWeightKg} error={errors.weight_kg} type="number" />
-            </div>
-            <Select label={t("reg.position")} value={position} onChange={setPosition} options={POSITIONS} placeholder={t("reg.position_placeholder")} error={errors.position} />
-            <Select label={t("reg.dominant_foot")} value={dominantFoot} onChange={setDominantFoot} options={DOMINANT_FEET} placeholder={t("reg.dominant_foot_placeholder")} error={errors.dominant_foot} />
-            <Select label={t("agent.country")} value={country} onChange={setCountry} options={COUNTRIES} placeholder={t("reg.country_placeholder")} error={errors.country} />
-            <Input label={t("reg.current_club")} value={currentClub} onChange={setCurrentClub} error={errors.current_club} disabled={freeAgent} />
-            <Checkbox checked={freeAgent} onChange={setFreeAgent} label={t("reg.free_agent")} />
-            <div className="rounded-xl border border-border bg-white px-4 py-3">
-              <label className="block text-sm font-medium text-text-primary mb-2">
-                {t("agent.players.video")}
-              </label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="block w-full text-sm"
+              <Input
+                label={t("reg.height")}
+                value={heightCm}
+                onChange={setHeightCm}
+                error={errors.height_cm}
+                type="number"
               />
-              {errors.file ? <p className="text-sm text-error mt-1">{errors.file}</p> : null}
+              <Input
+                label={t("reg.weight")}
+                value={weightKg}
+                onChange={setWeightKg}
+                error={errors.weight_kg}
+                type="number"
+              />
             </div>
+            <Select
+              label={t("reg.position")}
+              value={position}
+              onChange={setPosition}
+              options={POSITIONS}
+              placeholder={t("reg.position_placeholder")}
+              error={errors.position}
+            />
+            <Select
+              label={t("reg.dominant_foot")}
+              value={dominantFoot}
+              onChange={setDominantFoot}
+              options={DOMINANT_FEET}
+              placeholder={t("reg.dominant_foot_placeholder")}
+              error={errors.dominant_foot}
+            />
+            <Select
+              label={t("agent.country")}
+              value={country}
+              onChange={setCountry}
+              options={COUNTRIES}
+              placeholder={t("reg.country_placeholder")}
+              error={errors.country}
+            />
+            <Input
+              label={t("reg.current_club")}
+              value={currentClub}
+              onChange={setCurrentClub}
+              error={errors.current_club}
+              disabled={freeAgent}
+            />
+            <Checkbox
+              checked={freeAgent}
+              onChange={setFreeAgent}
+              label={t("reg.free_agent")}
+            />
+
+            <section>
+              <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wide mb-2">
+                {t("agent.players.video")}
+              </h3>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="video/mp4,video/quicktime,video/x-msvideo,video/webm"
+                className="hidden"
+                onChange={(e) => pickFile(e.target.files?.[0] ?? undefined)}
+              />
+
+              {!file ? (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full rounded-2xl border-2 border-dashed border-brand/50 bg-brand/5 p-6 text-center transition-all duration-200 hover:border-brand hover:bg-brand/10 active:scale-[0.99]"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="h-14 w-14 rounded-2xl bg-brand/15 text-brand flex items-center justify-center">
+                      <svg
+                        className="h-7 w-7"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.6}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-base font-semibold text-text-primary">
+                        {t("video.tap_upload")}
+                      </p>
+                      <p className="text-sm text-text-tertiary mt-1">
+                        {t("video.formats")} ·{" "}
+                        {t("video.max_size", { size: MAX_VIDEO_MB })}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ) : (
+                <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center flex-shrink-0">
+                      <svg
+                        className="h-6 w-6 text-success"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text-primary truncate">
+                        {file.name}
+                      </p>
+                      <p className="text-xs text-text-tertiary">
+                        {formatSizeMb(file.size)} MB
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFile(null);
+                        if (fileRef.current) fileRef.current.value = "";
+                      }}
+                      className="h-8 w-8 rounded-lg flex items-center justify-center text-text-tertiary hover:bg-surface-secondary hover:text-text-primary transition-colors"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {errors.file ? (
+                <p className="text-sm text-error mt-2">{errors.file}</p>
+              ) : null}
+            </section>
           </>
         ) : null}
 

@@ -79,6 +79,10 @@ const translations = {
   },
   "agent.players.val.video": { en: "Video is required", uk: "Потрібно додати відео" },
   "agent.players.video": { en: "Video attachment", uk: "Відео" },
+  "agent.players.err.network": {
+    en: "Upload failed. Check your connection or try a smaller file (Wi-Fi recommended for mobile).",
+    uk: "Не вдалося завантажити. Перевірте з'єднання або надішліть менший файл (рекомендуємо Wi-Fi).",
+  },
   "agent.pay.title": { en: "Choose submission type", uk: "Оберіть тип подачі" },
   "agent.pay.subtitle": {
     en: "Final amount = selected tariff × number of submitted players.",
