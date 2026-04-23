@@ -58,6 +58,32 @@ const translations = {
     en: "Next: add your players (coming in the next step).",
     uk: "Далі: додавання гравців (наступний крок).",
   },
+  "agent.step.players": { en: "Players", uk: "Гравці" },
+  "agent.step.payment": { en: "Payment", uk: "Оплата" },
+  "agent.players.added": { en: "Players added", uk: "Гравців додано" },
+  "agent.players.minimum": {
+    en: "Minimum required to continue: 2",
+    uk: "Мінімум для продовження: 2",
+  },
+  "agent.players.cta_add": { en: "Register next player", uk: "Додати наступного гравця" },
+  "agent.players.cta_continue": { en: "Continue", uk: "Продовжити" },
+  "agent.players.cta_continue_only": { en: "Continue", uk: "Продовжити" },
+  "agent.players.val.club": {
+    en: "Club is required unless player is free agent",
+    uk: "Вкажіть клуб або позначте free agent",
+  },
+  "agent.players.val.video": { en: "Video is required", uk: "Потрібно додати відео" },
+  "agent.players.video": { en: "Video attachment", uk: "Відео" },
+  "agent.pay.title": { en: "Choose submission type", uk: "Оберіть тип подачі" },
+  "agent.pay.subtitle": {
+    en: "The final amount depends on the selected tariff and number of players.",
+    uk: "Фінальна сума залежить від тарифу і кількості гравців.",
+  },
+  "agent.pay.per_player": { en: "player", uk: "гравця" },
+  "agent.pay.players": { en: "Players submitted", uk: "Гравців подано" },
+  "agent.pay.type": { en: "Submission type", uk: "Тип подачі" },
+  "agent.pay.total": { en: "Total", uk: "Всього" },
+  "agent.pay.cta": { en: "Confirm and pay — {amount} Stars", uk: "Підтвердити та оплатити — {amount} Stars" },
 
   // ── Trust card ──
   "trust.official": { en: "Official club process", uk: "Офіційний процес клубу" },

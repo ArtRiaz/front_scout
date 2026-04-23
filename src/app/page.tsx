@@ -12,6 +12,8 @@ import { Payment } from "@/components/screens/Payment";
 import { SocialVerification } from "@/components/screens/SocialVerification";
 import { AgentRegistration } from "@/components/screens/AgentRegistration";
 import { AgentMiniSummary } from "@/components/screens/AgentMiniSummary";
+import { AgentPlayers } from "@/components/screens/AgentPlayers";
+import { AgentPayment } from "@/components/screens/AgentPayment";
 
 function FlowCompleteScreen() {
   return (
@@ -133,7 +135,7 @@ export default function Home() {
               playersAdded: p.players_count,
             });
             setFlowKind("agent");
-            setAgentSubStep("summary");
+            setAgentSubStep("players");
             setShowWelcome(false);
             setApplicationComplete(false);
           } catch {
@@ -188,7 +190,11 @@ export default function Home() {
     webapp.BackButton.show();
     const handleBack = () => {
       if (flowKind === "agent") {
-        if (agentSubStep === "summary") {
+        if (agentSubStep === "payment") {
+          setAgentSubStep("players");
+        } else if (agentSubStep === "players") {
+          setAgentSubStep("register");
+        } else if (agentSubStep === "summary") {
           setAgentSubStep("register");
         } else {
           setShowWelcome(true);
@@ -281,7 +287,13 @@ export default function Home() {
     if (agentSubStep === "register") {
       return <AgentRegistration />;
     }
-    return <AgentMiniSummary />;
+    if (agentSubStep === "summary") {
+      return <AgentMiniSummary />;
+    }
+    if (agentSubStep === "players") {
+      return <AgentPlayers />;
+    }
+    return <AgentPayment />;
   }
 
   switch (step) {

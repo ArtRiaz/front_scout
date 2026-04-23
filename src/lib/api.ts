@@ -141,6 +141,69 @@ export async function getAgentProfile(telegramUserId: number) {
   }>(`/api/agent/profile/${telegramUserId}`);
 }
 
+export async function createAgentPlayer(data: {
+  telegram_user_id: number;
+  first_name: string;
+  last_name: string;
+  height_cm: number;
+  weight_kg: number;
+  position: string;
+  dominant_foot: "left" | "right" | "both";
+  country: string;
+  current_club: string | null;
+  free_agent: boolean;
+  file: File;
+}) {
+  const formData = new FormData();
+  formData.append("telegram_user_id", String(data.telegram_user_id));
+  formData.append("first_name", data.first_name);
+  formData.append("last_name", data.last_name);
+  formData.append("height_cm", String(data.height_cm));
+  formData.append("weight_kg", String(data.weight_kg));
+  formData.append("position", data.position);
+  formData.append("dominant_foot", data.dominant_foot);
+  formData.append("country", data.country);
+  formData.append("current_club", data.current_club ?? "");
+  formData.append("free_agent", String(data.free_agent));
+  formData.append("file", data.file);
+
+  const base = getApiBase();
+  const res = await fetch(`${base}/api/agent/players`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail || `Create player failed: ${res.status}`);
+  }
+  return res.json() as Promise<{
+    player_id: string;
+    players_count: number;
+    min_required: number;
+    max_allowed: number;
+  }>;
+}
+
+export async function initiateAgentCheckout(data: {
+  telegram_user_id: number;
+  submission_type: "standard" | "priority";
+}) {
+  return request<{
+    payment_id: string;
+    status: string;
+    players_count: number;
+    submission_type: string;
+    unit_price: number;
+    total_stars: number;
+    currency: string;
+    invoice_link: string;
+    invoice_payload: string;
+  }>("/api/agent/checkout/initiate", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export async function getSocialConfig() {
   return request<{
     instagram_url: string;

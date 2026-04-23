@@ -3,7 +3,7 @@
 import { StepLayout } from "@/components/layout/StepLayout";
 import { t } from "@/lib/i18n";
 import { useFormStore } from "@/store/useFormStore";
-import { getTelegramUserId, getWebApp } from "@/lib/telegram";
+import { getTelegramUserId } from "@/lib/telegram";
 import { trackEvent } from "@/lib/api";
 
 function roleLabel(role: string): string {
@@ -17,14 +17,14 @@ function roleLabel(role: string): string {
 }
 
 export function AgentMiniSummary() {
-  const { agentProfile } = useFormStore();
+  const { agentProfile, setAgentSubStep } = useFormStore();
 
   const handleContinue = async () => {
     const tgId = getTelegramUserId();
     if (tgId) {
       await trackEvent(tgId, "agent_summary_continue");
     }
-    getWebApp()?.showAlert?.(t("agent.next_phase_hint"));
+    setAgentSubStep("players");
   };
 
   if (!agentProfile) {
