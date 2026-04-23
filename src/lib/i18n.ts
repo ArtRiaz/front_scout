@@ -59,6 +59,11 @@ const translations = {
     uk: "Далі: додавання гравців (наступний крок).",
   },
   "agent.step.players": { en: "Players", uk: "Гравці" },
+  "agent.players.title": { en: "Add players", uk: "Додайте гравців" },
+  "agent.players.subtitle": {
+    en: "Register from 2 to 10 players. Add one player at a time.",
+    uk: "Додайте від 2 до 10 гравців, по одному за раз.",
+  },
   "agent.step.payment": { en: "Payment", uk: "Оплата" },
   "agent.players.added": { en: "Players added", uk: "Гравців додано" },
   "agent.players.minimum": {
@@ -76,9 +81,11 @@ const translations = {
   "agent.players.video": { en: "Video attachment", uk: "Відео" },
   "agent.pay.title": { en: "Choose submission type", uk: "Оберіть тип подачі" },
   "agent.pay.subtitle": {
-    en: "The final amount depends on the selected tariff and number of players.",
+    en: "Final amount = selected tariff × number of submitted players.",
     uk: "Фінальна сума залежить від тарифу і кількості гравців.",
   },
+  "agent.pay.tariff.standard": { en: "Standard submission", uk: "Стандартна подача" },
+  "agent.pay.tariff.priority": { en: "Priority submission", uk: "Пріоритетна подача" },
   "agent.pay.per_player": { en: "player", uk: "гравця" },
   "agent.pay.players": { en: "Players submitted", uk: "Гравців подано" },
   "agent.pay.type": { en: "Submission type", uk: "Тип подачі" },

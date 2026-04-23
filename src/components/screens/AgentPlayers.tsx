@@ -134,6 +134,10 @@ export function AgentPlayers() {
       <div className="space-y-5">
         <ClubBadge />
         <div className="rounded-2xl border border-border bg-surface p-4">
+          <h2 className="text-lg font-bold text-text-primary">{t("agent.players.title")}</h2>
+          <p className="mt-1 text-sm text-text-secondary">{t("agent.players.subtitle")}</p>
+        </div>
+        <div className="rounded-2xl border border-border bg-surface p-4">
           <p className="text-sm text-text-secondary">
             {t("agent.players.added")}:{" "}
             <span className="font-bold text-brand">{playersAdded}/10</span>

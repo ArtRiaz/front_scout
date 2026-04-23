@@ -11,10 +11,10 @@ import { useFormStore } from "@/store/useFormStore";
 const TARIFFS: Array<{
   key: "standard" | "priority";
   price: number;
-  label: string;
+  labelKey: "agent.pay.tariff.standard" | "agent.pay.tariff.priority";
 }> = [
-  { key: "standard", price: 80, label: "Standard" },
-  { key: "priority", price: 150, label: "Priority" },
+  { key: "standard", price: 80, labelKey: "agent.pay.tariff.standard" },
+  { key: "priority", price: 150, labelKey: "agent.pay.tariff.priority" },
 ];
 
 export function AgentPayment() {
@@ -108,7 +108,7 @@ export function AgentPayment() {
                     : "border-border bg-white"
                 }`}
               >
-                <p className="font-semibold text-text-primary">{tariff.label}</p>
+                <p className="font-semibold text-text-primary">{t(tariff.labelKey)}</p>
                 <p className="text-sm text-text-secondary">
                   {tariff.price} Stars / {t("agent.pay.per_player")}
                 </p>
@@ -135,7 +135,9 @@ export function AgentPayment() {
           <div className="mt-2 flex justify-between">
             <span className="text-text-tertiary">{t("agent.pay.type")}</span>
             <span className="font-medium text-text-primary">
-              {submissionType === "priority" ? "Priority" : "Standard"}
+              {submissionType === "priority"
+                ? t("agent.pay.tariff.priority")
+                : t("agent.pay.tariff.standard")}
             </span>
           </div>
           <div className="mt-3 border-t border-border pt-3 flex justify-between">
