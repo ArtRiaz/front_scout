@@ -123,7 +123,7 @@ export default function Home() {
             setStep(1);
           }
           setShowWelcome(false);
-        } else if (s.has_agent_registration && getLocale() === "en") {
+        } else if (s.has_agent_registration) {
           try {
             const p = await getAgentProfile(tgId);
             if (cancelled) return;

@@ -8,7 +8,7 @@ import { ClubBadge } from "@/components/ui/ClubBadge";
 import { COUNTRIES } from "@/types";
 import { getAgentProfile, registerAgent } from "@/lib/api";
 import { getTelegramUserId } from "@/lib/telegram";
-import { t, getLocale } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 import { useFormStore } from "@/store/useFormStore";
 
 const AGENT_ROLES = () => [
@@ -44,11 +44,6 @@ export function AgentRegistration() {
     const tgId = getTelegramUserId();
     if (!tgId) {
       setSubmitError(t("misc.open_from_tg"));
-      return;
-    }
-
-    if (getLocale() !== "en") {
-      setSubmitError(t("agent.en_only"));
       return;
     }
 
