@@ -53,17 +53,34 @@ export function AgentPayment() {
         setError(t("pay.invoice_unavailable"));
         return;
       }
-      webapp.openInvoice(payment.invoice_link);
+
+      const invoiceResult = await new Promise<
+        "paid" | "cancelled" | "failed" | "pending"
+      >((resolve) => {
+        try {
+          webapp.openInvoice(payment.invoice_link, (status) => resolve(status));
+        } catch {
+          resolve("failed");
+        }
+      });
+
+      if (invoiceResult === "cancelled" || invoiceResult === "failed") {
+        setError(t("pay.not_confirmed"));
+        return;
+      }
 
       const startedAt = Date.now();
-      const timeoutMs = 180_000;
+      const timeoutMs = invoiceResult === "paid" ? 60_000 : 180_000;
+      let confirmed = false;
       while (Date.now() - startedAt < timeoutMs) {
         const status = await getStatus(tgId);
-        if (status.has_payment) break;
+        if (status.has_payment) {
+          confirmed = true;
+          break;
+        }
         await new Promise((r) => setTimeout(r, 2000));
       }
-      const status = await getStatus(tgId);
-      if (!status.has_payment) {
+      if (!confirmed) {
         setError(t("pay.not_confirmed"));
         return;
       }

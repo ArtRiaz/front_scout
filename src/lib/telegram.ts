@@ -2,7 +2,10 @@ interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
   close: () => void;
-  openInvoice: (link: string) => void;
+  openInvoice: (
+    link: string,
+    callback?: (status: "paid" | "cancelled" | "failed" | "pending") => void,
+  ) => void;
   MainButton: {
     text: string;
     show: () => void;

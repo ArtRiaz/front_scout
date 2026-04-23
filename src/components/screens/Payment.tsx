@@ -129,24 +129,34 @@ export function Payment() {
         invoice_payload: payment.invoice_payload,
       });
 
-      try {
-        webapp.openInvoice(invoiceLink);
-      } catch {
-        window.open(invoiceLink, "_blank", "noopener,noreferrer");
+      const invoiceResult = await new Promise<
+        "paid" | "cancelled" | "failed" | "pending"
+      >((resolve) => {
+        try {
+          webapp.openInvoice(invoiceLink, (status) => resolve(status));
+        } catch {
+          window.open(invoiceLink, "_blank", "noopener,noreferrer");
+          resolve("pending");
+        }
+      });
+
+      if (invoiceResult === "cancelled" || invoiceResult === "failed") {
+        setError(t("pay.not_confirmed"));
+        return;
       }
 
       const startedAt = Date.now();
-      const timeoutMs = 180_000;
-
-      // eslint-disable-next-line no-constant-condition
+      const timeoutMs = invoiceResult === "paid" ? 60_000 : 180_000;
+      let confirmed = false;
       while (Date.now() - startedAt < timeoutMs) {
         const status = await getStatus(tgId);
-        if (status.has_payment) break;
+        if (status.has_payment) {
+          confirmed = true;
+          break;
+        }
         await new Promise((r) => setTimeout(r, 2000));
       }
-
-      const status = await getStatus(tgId);
-      if (!status.has_payment) {
+      if (!confirmed) {
         setError(t("pay.not_confirmed"));
         return;
       }
