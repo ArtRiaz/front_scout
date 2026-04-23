@@ -403,13 +403,32 @@ export function AgentPlayers() {
         ) : null}
 
         {canContinue ? (
-          <button
-            type="button"
-            onClick={handleContinue}
-            className="w-full h-12 rounded-xl border border-border bg-white text-text-primary font-semibold"
-          >
-            {t("agent.players.cta_continue")}
-          </button>
+          <div className="rounded-2xl border-2 border-brand/60 bg-brand/5 p-4 shadow-sm">
+            <p className="text-sm text-text-secondary">
+              {t("agent.players.ready_hint")}
+            </p>
+            <button
+              type="button"
+              onClick={handleContinue}
+              disabled={isSubmitting}
+              className="mt-3 flex w-full items-center justify-center gap-2 h-14 rounded-xl bg-brand text-white font-semibold text-base shadow-md transition-all duration-200 hover:bg-brand-light active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+            >
+              <span>{t("agent.players.cta_continue")}</span>
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13 5l7 7-7 7M5 12h15"
+                />
+              </svg>
+            </button>
+          </div>
         ) : null}
       </div>
     </StepLayout>

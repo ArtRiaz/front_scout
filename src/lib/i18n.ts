@@ -71,8 +71,12 @@ const translations = {
     uk: "Мінімум для продовження: 2",
   },
   "agent.players.cta_add": { en: "Register next player", uk: "Додати наступного гравця" },
-  "agent.players.cta_continue": { en: "Continue", uk: "Продовжити" },
-  "agent.players.cta_continue_only": { en: "Continue", uk: "Продовжити" },
+  "agent.players.cta_continue": { en: "Continue to payment", uk: "Перейти до оплати" },
+  "agent.players.cta_continue_only": { en: "Continue to payment", uk: "Перейти до оплати" },
+  "agent.players.ready_hint": {
+    en: "Minimum reached. You can add more players or proceed to payment.",
+    uk: "Мінімум досягнуто. Можна додати ще гравців або перейти до оплати.",
+  },
   "agent.players.val.club": {
     en: "Club is required unless player is free agent",
     uk: "Вкажіть клуб або позначте free agent",
