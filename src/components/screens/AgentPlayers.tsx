@@ -45,6 +45,7 @@ export function AgentPlayers() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const playersAdded = agentProfile?.playersAdded ?? 0;
@@ -119,19 +120,23 @@ export function AgentPlayers() {
     if (!file) return;
     try {
       setIsSubmitting(true);
-      const res = await createAgentPlayer({
-        telegram_user_id: tgId,
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        height_cm: Number(heightCm),
-        weight_kg: Number(weightKg),
-        position,
-        dominant_foot: dominantFoot as "left" | "right" | "both",
-        country,
-        current_club: freeAgent ? null : currentClub.trim(),
-        free_agent: freeAgent,
-        file,
-      });
+      setUploadPct(0);
+      const res = await createAgentPlayer(
+        {
+          telegram_user_id: tgId,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          height_cm: Number(heightCm),
+          weight_kg: Number(weightKg),
+          position,
+          dominant_foot: dominantFoot as "left" | "right" | "both",
+          country,
+          current_club: freeAgent ? null : currentClub.trim(),
+          free_agent: freeAgent,
+          file,
+        },
+        (pct) => setUploadPct(pct),
+      );
       if (agentProfile) {
         setAgentProfile({ ...agentProfile, playersAdded: res.players_count });
       }
@@ -140,7 +145,13 @@ export function AgentPlayers() {
       const raw = err instanceof Error ? err.message : "";
       const lower = raw.toLowerCase();
       let message = raw || t("misc.something_wrong");
-      if (lower.includes("load failed") || lower.includes("failed to fetch")) {
+      if (
+        lower.includes("load failed") ||
+        lower.includes("failed to fetch") ||
+        lower.includes("network error") ||
+        lower.includes("aborted") ||
+        lower.includes("timed out")
+      ) {
         message = t("agent.players.err.network");
       } else if (lower.includes("413") || lower.includes("too large")) {
         message = t("video.too_large", { size: MAX_VIDEO_MB });
@@ -148,6 +159,7 @@ export function AgentPlayers() {
       setSubmitError(message);
     } finally {
       setIsSubmitting(false);
+      setUploadPct(0);
     }
   };
 
@@ -340,29 +352,46 @@ export function AgentPlayers() {
                         {formatSizeMb(file.size)} MB
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFile(null);
-                        if (fileRef.current) fileRef.current.value = "";
-                      }}
-                      className="h-8 w-8 rounded-lg flex items-center justify-center text-text-tertiary hover:bg-surface-secondary hover:text-text-primary transition-colors"
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
+                    {!isSubmitting ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFile(null);
+                          if (fileRef.current) fileRef.current.value = "";
+                        }}
+                        className="h-8 w-8 rounded-lg flex items-center justify-center text-text-tertiary hover:bg-surface-secondary hover:text-text-primary transition-colors"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    ) : null}
                   </div>
+                  {isSubmitting ? (
+                    <div className="mt-3">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-border/60">
+                        <div
+                          className="h-full rounded-full bg-brand transition-[width] duration-200"
+                          style={{ width: `${uploadPct}%` }}
+                        />
+                      </div>
+                      <p className="mt-1.5 text-xs text-text-tertiary">
+                        {uploadPct < 100
+                          ? `Uploading… ${uploadPct}%`
+                          : "Processing…"}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               )}
 

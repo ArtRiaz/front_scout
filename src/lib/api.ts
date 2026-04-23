@@ -141,19 +141,27 @@ export async function getAgentProfile(telegramUserId: number) {
   }>(`/api/agent/profile/${telegramUserId}`);
 }
 
-export async function createAgentPlayer(data: {
-  telegram_user_id: number;
-  first_name: string;
-  last_name: string;
-  height_cm: number;
-  weight_kg: number;
-  position: string;
-  dominant_foot: "left" | "right" | "both";
-  country: string;
-  current_club: string | null;
-  free_agent: boolean;
-  file: File;
-}) {
+export async function createAgentPlayer(
+  data: {
+    telegram_user_id: number;
+    first_name: string;
+    last_name: string;
+    height_cm: number;
+    weight_kg: number;
+    position: string;
+    dominant_foot: "left" | "right" | "both";
+    country: string;
+    current_club: string | null;
+    free_agent: boolean;
+    file: File;
+  },
+  onProgress?: (percent: number) => void,
+): Promise<{
+  player_id: string;
+  players_count: number;
+  min_required: number;
+  max_allowed: number;
+}> {
   const formData = new FormData();
   formData.append("telegram_user_id", String(data.telegram_user_id));
   formData.append("first_name", data.first_name);
@@ -168,20 +176,55 @@ export async function createAgentPlayer(data: {
   formData.append("file", data.file);
 
   const base = getApiBase();
-  const res = await fetch(`${base}/api/agent/players`, {
-    method: "POST",
-    body: formData,
+  const url = `${base}/api/agent/players`;
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.responseType = "text";
+    xhr.timeout = 15 * 60 * 1000; // 15 minutes — allow slow mobile uploads
+
+    if (xhr.upload && onProgress) {
+      xhr.upload.onprogress = (evt) => {
+        if (evt.lengthComputable && evt.total > 0) {
+          const pct = Math.round((evt.loaded / evt.total) * 100);
+          onProgress(pct);
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      const status = xhr.status;
+      const text = xhr.responseText || "";
+      let body: Record<string, unknown> = {};
+      try {
+        body = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+      } catch {
+        body = {};
+      }
+      if (status >= 200 && status < 300) {
+        resolve(
+          body as unknown as {
+            player_id: string;
+            players_count: number;
+            min_required: number;
+            max_allowed: number;
+          },
+        );
+      } else {
+        const detail =
+          typeof body.detail === "string"
+            ? body.detail
+            : `Create player failed: ${status}`;
+        reject(new Error(detail));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Network error while uploading video"));
+    xhr.onabort = () => reject(new Error("Upload aborted"));
+    xhr.ontimeout = () => reject(new Error("Upload timed out"));
+
+    xhr.send(formData);
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail || `Create player failed: ${res.status}`);
-  }
-  return res.json() as Promise<{
-    player_id: string;
-    players_count: number;
-    min_required: number;
-    max_allowed: number;
-  }>;
 }
 
 export async function initiateAgentCheckout(data: {
