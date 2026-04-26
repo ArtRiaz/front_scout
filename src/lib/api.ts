@@ -227,6 +227,15 @@ export async function createAgentPlayer(
   });
 }
 
+export async function getAgentPaymentStatus(
+  telegramUserId: number,
+  paymentId: string,
+) {
+  return request<{ payment_id: string; status: string }>(
+    `/api/agent/checkout/status/${telegramUserId}/${paymentId}`,
+  );
+}
+
 export async function initiateAgentCheckout(data: {
   telegram_user_id: number;
   submission_type: "standard" | "priority";

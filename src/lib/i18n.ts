@@ -99,6 +99,18 @@ const translations = {
   "agent.pay.type": { en: "Submission type", uk: "Тип подачі" },
   "agent.pay.total": { en: "Total", uk: "Всього" },
   "agent.pay.cta": { en: "Confirm and pay — {amount} Stars", uk: "Підтвердити та оплатити — {amount} Stars" },
+  "agent.pay.success_title": {
+    en: "Payment received",
+    uk: "Оплата отримана",
+  },
+  "agent.pay.success_desc": {
+    en: "Your players have been submitted for review. You can open the bot again to add more players.",
+    uk: "Ваші гравці надіслані на розгляд. Відкрийте бота знову, щоб додати ще гравців.",
+  },
+  "agent.pay.auto_close": {
+    en: "Closing automatically…",
+    uk: "Автоматичне закриття…",
+  },
 
   // ── Trust card ──
   "trust.official": { en: "Official club process", uk: "Офіційний процес клубу" },

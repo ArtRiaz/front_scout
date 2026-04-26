@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StepLayout } from "@/components/layout/StepLayout";
 import { ClubBadge } from "@/components/ui/ClubBadge";
-import { initiateAgentCheckout, getStatus } from "@/lib/api";
+import {
+  initiateAgentCheckout,
+  getAgentPaymentStatus,
+  getAgentProfile,
+} from "@/lib/api";
 import { getTelegramUserId, getWebApp } from "@/lib/telegram";
 import { t } from "@/lib/i18n";
 import { useFormStore } from "@/store/useFormStore";
@@ -24,17 +28,51 @@ const TARIFFS: Array<{
   { key: "priority", price: PRIORITY_PRICE, labelKey: "agent.pay.tariff.priority" },
 ];
 
+const AUTO_CLOSE_MS = 2500;
+
 export function AgentPayment() {
-  const { agentProfile, setApplicationComplete, setAgentCheckout } = useFormStore();
+  const {
+    agentProfile,
+    setAgentCheckout,
+    setAgentProfile,
+    setAgentSubStep,
+  } = useFormStore();
   const [submissionType, setSubmissionType] = useState<"standard" | "priority">(
     "standard",
   );
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paid, setPaid] = useState(false);
 
   const playersCount = agentProfile?.playersAdded ?? 0;
-  const unitPrice = TARIFFS.find((t) => t.key === submissionType)?.price ?? 80;
+  const unitPrice = TARIFFS.find((tar) => tar.key === submissionType)?.price ?? 80;
   const totalStars = unitPrice * playersCount;
+
+  // Auto-close + reset to fresh batch after success
+  useEffect(() => {
+    if (!paid) return;
+    const tgId = getTelegramUserId();
+    const timer = setTimeout(async () => {
+      try {
+        if (tgId) {
+          const profile = await getAgentProfile(tgId);
+          setAgentProfile({
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            country: profile.country,
+            agentRole: profile.agent_role,
+            playersAdded: profile.players_count,
+          });
+        }
+      } catch {
+        // ignore — user can re-open
+      }
+      setAgentSubStep("players");
+      setAgentCheckout(null);
+      getWebApp()?.close?.();
+    }, AUTO_CLOSE_MS);
+    return () => clearTimeout(timer);
+  }, [paid, setAgentProfile, setAgentSubStep, setAgentCheckout]);
 
   const handlePay = async () => {
     setError("");
@@ -77,13 +115,17 @@ export function AgentPayment() {
       }
 
       const startedAt = Date.now();
-      const timeoutMs = invoiceResult === "paid" ? 60_000 : 180_000;
+      const timeoutMs = invoiceResult === "paid" ? 90_000 : 180_000;
       let confirmed = false;
       while (Date.now() - startedAt < timeoutMs) {
-        const status = await getStatus(tgId);
-        if (status.has_payment) {
-          confirmed = true;
-          break;
+        try {
+          const ps = await getAgentPaymentStatus(tgId, payment.payment_id);
+          if (ps.status === "success") {
+            confirmed = true;
+            break;
+          }
+        } catch {
+          // transient error — keep polling
         }
         await new Promise((r) => setTimeout(r, 2000));
       }
@@ -91,14 +133,42 @@ export function AgentPayment() {
         setError(t("pay.not_confirmed"));
         return;
       }
-      setApplicationComplete(true);
-      getWebApp()?.close?.();
+      setPaid(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("misc.something_wrong"));
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (paid) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[100dvh] px-5">
+        <div className="step-enter flex flex-col items-center text-center">
+          <div className="h-20 w-20 rounded-full bg-success/10 flex items-center justify-center mb-6">
+            <svg
+              className="h-10 w-10 text-success"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.4}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-text-primary mb-2">
+            {t("agent.pay.success_title")}
+          </h2>
+          <p className="text-sm text-text-secondary max-w-xs">
+            {t("agent.pay.success_desc")}
+          </p>
+          <p className="mt-4 text-xs text-text-tertiary">
+            {t("agent.pay.auto_close")}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <StepLayout
