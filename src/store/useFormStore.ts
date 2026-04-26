@@ -10,6 +10,7 @@ export interface AgentProfileSnapshot {
   country: string;
   agentRole: string;
   playersAdded: number;
+  paidPlayersCount?: number;
 }
 
 export interface AgentCheckoutSnapshot {

@@ -137,6 +137,7 @@ export async function getAgentProfile(telegramUserId: number) {
     country: string;
     agent_role: string;
     players_count: number;
+    paid_players_count?: number;
     created_at: string;
   }>(`/api/agent/profile/${telegramUserId}`);
 }

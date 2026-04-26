@@ -99,6 +99,14 @@ const translations = {
   "agent.pay.type": { en: "Submission type", uk: "Тип подачі" },
   "agent.pay.total": { en: "Total", uk: "Всього" },
   "agent.pay.cta": { en: "Confirm and pay — {amount} Stars", uk: "Підтвердити та оплатити — {amount} Stars" },
+  "agent.players.previous_title": {
+    en: "{count} players already submitted",
+    uk: "{count} гравців уже подано",
+  },
+  "agent.players.previous_desc": {
+    en: "Adding more players starts a new submission and a new payment.",
+    uk: "Додавання нових гравців почне нову подачу і нову оплату.",
+  },
   "agent.pay.success_title": {
     en: "Payment received",
     uk: "Оплата отримана",

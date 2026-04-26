@@ -62,6 +62,7 @@ export function AgentPayment() {
             country: profile.country,
             agentRole: profile.agent_role,
             playersAdded: profile.players_count,
+            paidPlayersCount: profile.paid_players_count ?? 0,
           });
         }
       } catch {

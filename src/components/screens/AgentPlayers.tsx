@@ -49,6 +49,7 @@ export function AgentPlayers() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const playersAdded = agentProfile?.playersAdded ?? 0;
+  const paidPlayersCount = agentProfile?.paidPlayersCount ?? 0;
   const canContinue = playersAdded >= 2;
   const canAddMore = playersAdded < 10;
 
@@ -186,6 +187,32 @@ export function AgentPlayers() {
     >
       <div className="space-y-5">
         <ClubBadge />
+
+        {paidPlayersCount > 0 ? (
+          <div className="rounded-2xl border border-brand/30 bg-brand/5 p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 h-6 w-6 flex-shrink-0 rounded-full bg-success/15 text-success flex items-center justify-center">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.4}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="text-sm leading-relaxed text-text-primary">
+                <p className="font-semibold">
+                  {t("agent.players.previous_title", { count: paidPlayersCount })}
+                </p>
+                <p className="mt-1 text-text-secondary">
+                  {t("agent.players.previous_desc")}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className="rounded-2xl border border-border bg-surface p-4">
           <h2 className="text-lg font-bold text-text-primary">

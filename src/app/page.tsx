@@ -133,6 +133,7 @@ export default function Home() {
               country: p.country,
               agentRole: p.agent_role,
               playersAdded: p.players_count,
+              paidPlayersCount: p.paid_players_count ?? 0,
             });
             setFlowKind("agent");
             setAgentSubStep("players");
