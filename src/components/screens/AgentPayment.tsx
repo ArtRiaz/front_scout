@@ -8,13 +8,20 @@ import { getTelegramUserId, getWebApp } from "@/lib/telegram";
 import { t } from "@/lib/i18n";
 import { useFormStore } from "@/store/useFormStore";
 
+const STANDARD_PRICE = Number(
+  process.env.NEXT_PUBLIC_AGENT_PRICE_STANDARD ?? 80,
+);
+const PRIORITY_PRICE = Number(
+  process.env.NEXT_PUBLIC_AGENT_PRICE_PRIORITY ?? 150,
+);
+
 const TARIFFS: Array<{
   key: "standard" | "priority";
   price: number;
   labelKey: "agent.pay.tariff.standard" | "agent.pay.tariff.priority";
 }> = [
-  { key: "standard", price: 80, labelKey: "agent.pay.tariff.standard" },
-  { key: "priority", price: 150, labelKey: "agent.pay.tariff.priority" },
+  { key: "standard", price: STANDARD_PRICE, labelKey: "agent.pay.tariff.standard" },
+  { key: "priority", price: PRIORITY_PRICE, labelKey: "agent.pay.tariff.priority" },
 ];
 
 export function AgentPayment() {
