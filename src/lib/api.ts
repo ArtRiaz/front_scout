@@ -112,6 +112,7 @@ export async function registerAgent(data: {
   last_name: string;
   country: string;
   agent_role: "agent" | "scout" | "academy";
+  whatsapp_phone: string;
 }) {
   return request<{
     id: string;
@@ -120,6 +121,7 @@ export async function registerAgent(data: {
     last_name: string;
     country: string;
     agent_role: string;
+    whatsapp_phone?: string | null;
     players_count: number;
     created_at: string;
   }>("/api/agent/register", {
@@ -136,6 +138,7 @@ export async function getAgentProfile(telegramUserId: number) {
     last_name: string;
     country: string;
     agent_role: string;
+    whatsapp_phone?: string | null;
     players_count: number;
     paid_players_count?: number;
     created_at: string;

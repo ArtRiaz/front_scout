@@ -132,6 +132,7 @@ export default function Home() {
               lastName: p.last_name,
               country: p.country,
               agentRole: p.agent_role,
+              whatsappPhone: p.whatsapp_phone ?? "",
               playersAdded: p.players_count,
               paidPlayersCount: p.paid_players_count ?? 0,
             });

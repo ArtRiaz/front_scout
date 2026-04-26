@@ -9,6 +9,7 @@ export interface AgentProfileSnapshot {
   lastName: string;
   country: string;
   agentRole: string;
+  whatsappPhone?: string;
   playersAdded: number;
   paidPlayersCount?: number;
 }

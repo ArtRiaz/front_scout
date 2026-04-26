@@ -92,6 +92,7 @@ export function AgentPayment() {
             lastName: profile.last_name,
             country: profile.country,
             agentRole: profile.agent_role,
+            whatsappPhone: profile.whatsapp_phone ?? "",
             playersAdded: profile.players_count,
             paidPlayersCount: profile.paid_players_count ?? 0,
           });
@@ -117,6 +118,7 @@ export function AgentPayment() {
             lastName: profile.last_name,
             country: profile.country,
             agentRole: profile.agent_role,
+            whatsappPhone: profile.whatsapp_phone ?? "",
             playersAdded: profile.players_count,
             paidPlayersCount: profile.paid_players_count ?? 0,
           });
@@ -285,6 +287,16 @@ export function AgentPayment() {
             <span className="text-text-tertiary">{t("agent.summary.country")}</span>
             <span className="font-medium text-text-primary">{agentProfile?.country}</span>
           </div>
+          {agentProfile?.whatsappPhone ? (
+            <div className="mt-2 flex justify-between">
+              <span className="text-text-tertiary">
+                {t("agent.summary.whatsapp")}
+              </span>
+              <span className="font-medium text-text-primary">
+                {agentProfile.whatsappPhone}
+              </span>
+            </div>
+          ) : null}
           <div className="mt-2 flex justify-between">
             <span className="text-text-tertiary">{t("agent.pay.players")}</span>
             <span className="font-medium text-text-primary">{playersCount}</span>

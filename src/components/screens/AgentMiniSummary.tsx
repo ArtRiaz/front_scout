@@ -72,6 +72,16 @@ export function AgentMiniSummary() {
                 {roleLabel(agentProfile.agentRole)}
               </dd>
             </div>
+            {agentProfile.whatsappPhone ? (
+              <div className="flex justify-between gap-4">
+                <dt className="text-text-tertiary">
+                  {t("agent.summary.whatsapp")}
+                </dt>
+                <dd className="text-right font-medium text-text-primary">
+                  {agentProfile.whatsappPhone}
+                </dd>
+              </div>
+            ) : null}
             <div className="border-t border-border pt-3 flex justify-between gap-4">
               <dt className="text-text-tertiary">
                 {t("agent.summary.players_added")}

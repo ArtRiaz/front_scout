@@ -37,6 +37,26 @@ const translations = {
   "agent.val.last_name": { en: "Last name is required", uk: "Вкажіть прізвище" },
   "agent.val.country": { en: "Country is required", uk: "Оберіть країну" },
   "agent.val.role": { en: "Select your status", uk: "Оберіть статус" },
+  "agent.val.whatsapp": {
+    en: "WhatsApp number is required",
+    uk: "Вкажіть номер WhatsApp",
+  },
+  "agent.val.whatsapp_format": {
+    en: "Enter a valid phone number (with country code)",
+    uk: "Введіть коректний номер (з кодом країни)",
+  },
+  "agent.whatsapp": {
+    en: "WhatsApp number",
+    uk: "Номер WhatsApp",
+  },
+  "agent.whatsapp_hint": {
+    en: "Include the country code, e.g. +234 801 234 5678. Our scouts will use it to contact you.",
+    uk: "Введіть номер з кодом країни, наприклад +380 50 123 45 67. Скаути зв'яжуться через WhatsApp.",
+  },
+  "agent.summary.whatsapp": {
+    en: "WhatsApp",
+    uk: "WhatsApp",
+  },
   "agent.en_only": {
     en: "Agent flow is available in English only.",
     uk: "Флоу агента доступний лише англійською.",

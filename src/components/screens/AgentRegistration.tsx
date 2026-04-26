@@ -23,6 +23,7 @@ export function AgentRegistration() {
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
   const [agentRole, setAgentRole] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,9 +34,18 @@ export function AgentRegistration() {
     if (!lastName.trim()) e.lastName = t("agent.val.last_name");
     if (!country) e.country = t("agent.val.country");
     if (!agentRole) e.agentRole = t("agent.val.role");
+    const phone = whatsappPhone.trim();
+    if (!phone) {
+      e.whatsappPhone = t("agent.val.whatsapp");
+    } else {
+      const digits = phone.replace(/[^0-9]/g, "");
+      if (digits.length < 6 || digits.length > 20) {
+        e.whatsappPhone = t("agent.val.whatsapp_format");
+      }
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
-  }, [firstName, lastName, country, agentRole]);
+  }, [firstName, lastName, country, agentRole, whatsappPhone]);
 
   const handleContinue = async () => {
     setSubmitError("");
@@ -55,12 +65,14 @@ export function AgentRegistration() {
         last_name: lastName.trim(),
         country,
         agent_role: agentRole as "agent" | "scout" | "academy",
+        whatsapp_phone: whatsappPhone.trim(),
       });
       setAgentProfile({
         firstName: res.first_name,
         lastName: res.last_name,
         country: res.country,
         agentRole: res.agent_role,
+        whatsappPhone: res.whatsapp_phone ?? whatsappPhone.trim(),
         playersAdded: res.players_count,
       });
       setAgentSubStep("summary");
@@ -75,6 +87,7 @@ export function AgentRegistration() {
             lastName: existing.last_name,
             country: existing.country,
             agentRole: existing.agent_role,
+            whatsappPhone: existing.whatsapp_phone ?? "",
             playersAdded: existing.players_count,
           });
           setAgentSubStep("summary");
@@ -142,6 +155,22 @@ export function AgentRegistration() {
           placeholder={t("agent.status_placeholder")}
           error={errors.agentRole}
         />
+        <div className="flex flex-col gap-1">
+          <Input
+            label={t("agent.whatsapp")}
+            value={whatsappPhone}
+            onChange={(v) => setWhatsappPhone(v)}
+            error={errors.whatsappPhone}
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="+234 801 234 5678"
+          />
+          {!errors.whatsappPhone ? (
+            <p className="text-xs text-text-tertiary">
+              {t("agent.whatsapp_hint")}
+            </p>
+          ) : null}
+        </div>
       </div>
     </StepLayout>
   );
