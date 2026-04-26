@@ -145,27 +145,36 @@ export async function getAgentProfile(telegramUserId: number) {
   }>(`/api/agent/profile/${telegramUserId}`);
 }
 
-export async function createAgentPlayer(
-  data: {
-    telegram_user_id: number;
-    first_name: string;
-    last_name: string;
-    height_cm: number;
-    weight_kg: number;
-    position: string;
-    dominant_foot: "left" | "right" | "both";
-    country: string;
-    current_club: string | null;
-    free_agent: boolean;
-    file: File;
-  },
-  onProgress?: (percent: number) => void,
-): Promise<{
+interface CreateAgentPlayerData {
+  telegram_user_id: number;
+  first_name: string;
+  last_name: string;
+  height_cm: number;
+  weight_kg: number;
+  position: string;
+  dominant_foot: "left" | "right" | "both";
+  country: string;
+  current_club: string | null;
+  free_agent: boolean;
+  file: File;
+}
+
+interface CreateAgentPlayerResponse {
   player_id: string;
   players_count: number;
   min_required: number;
   max_allowed: number;
-}> {
+}
+
+function uploadAgentPlayerOnce(
+  data: CreateAgentPlayerData,
+  url: string,
+  attemptNumber: number,
+  onProgress?: (percent: number) => void,
+): Promise<CreateAgentPlayerResponse> {
+  // Rebuild FormData per attempt: a previously-aborted XHR may have
+  // partially consumed the underlying Blob streams in some WebKit
+  // builds, which would make the next send() fail in the same way.
   const formData = new FormData();
   formData.append("telegram_user_id", String(data.telegram_user_id));
   formData.append("first_name", data.first_name);
@@ -178,9 +187,6 @@ export async function createAgentPlayer(
   formData.append("current_club", data.current_club ?? "");
   formData.append("free_agent", String(data.free_agent));
   formData.append("file", data.file);
-
-  const base = getApiBase();
-  const url = `${base}/api/agent/players`;
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -215,7 +221,7 @@ export async function createAgentPlayer(
     const buildDiag = (label: string) => {
       const elapsed = Date.now() - startedAt;
       return (
-        `[upload ${label}] ` +
+        `[upload ${label} attempt=${attemptNumber}] ` +
         `rs=${xhr.readyState} st=${xhr.status} ` +
         `sent=${lastLoaded}/${lastTotal || data.file.size}B ` +
         `elapsed=${elapsed}ms`
@@ -232,14 +238,7 @@ export async function createAgentPlayer(
         body = {};
       }
       if (status >= 200 && status < 300) {
-        resolve(
-          body as unknown as {
-            player_id: string;
-            players_count: number;
-            min_required: number;
-            max_allowed: number;
-          },
-        );
+        resolve(body as unknown as CreateAgentPlayerResponse);
       } else {
         const detail =
           typeof body.detail === "string"
@@ -260,6 +259,46 @@ export async function createAgentPlayer(
       reject(new Error(`xhr.send threw: ${msg} ${buildDiag("send_throw")}`));
     }
   });
+}
+
+export async function createAgentPlayer(
+  data: CreateAgentPlayerData,
+  onProgress?: (percent: number) => void,
+): Promise<CreateAgentPlayerResponse> {
+  // iOS Telegram WebView intermittently aborts multipart POSTs at the
+  // TLS layer (status=0 with sub-100ms duration) after the app has been
+  // backgrounded or after a network handoff. The server never sees the
+  // request. Auto-retry on transient errors only — never on real HTTP
+  // 4xx/5xx replies, which mean the body actually reached FastAPI.
+  const TRANSIENT_RE = /\[upload (error|abort|timeout|send_throw)/;
+  const RETRY_DELAYS_MS = [0, 800, 2500];
+
+  const base = getApiBase();
+  const url = `${base}/api/agent/players`;
+
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    const delay = RETRY_DELAYS_MS[attempt - 1];
+    if (delay > 0) {
+      await new Promise((r) => setTimeout(r, delay));
+      // Reset progress for the next attempt so the UI doesn't pretend
+      // the upload is at 80% when it actually starts from zero again.
+      onProgress?.(0);
+    }
+    try {
+      return await uploadAgentPlayerOnce(data, url, attempt, onProgress);
+    } catch (err) {
+      lastError = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!TRANSIENT_RE.test(msg)) {
+        // Real HTTP error from the backend (validation, 413, 500…).
+        // Bubble immediately, retrying would just make duplicates if
+        // the server happens to recover.
+        throw err;
+      }
+    }
+  }
+  throw lastError;
 }
 
 export async function getAgentPaymentStatus(
