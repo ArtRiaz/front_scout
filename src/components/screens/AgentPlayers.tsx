@@ -53,7 +53,9 @@ export function AgentPlayers() {
   const [uploadPct, setUploadPct] = useState(0);
   const [batchPlayers, setBatchPlayers] = useState<AgentBatchPlayer[]>([]);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [isPreparingFile, setIsPreparingFile] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const submitInFlight = useRef(false);
 
   const playersAdded = agentProfile?.playersAdded ?? 0;
   const paidPlayersCount = agentProfile?.paidPlayersCount ?? 0;
@@ -116,7 +118,7 @@ export function AgentPlayers() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const pickFile = (picked: File | undefined) => {
+  const pickFile = async (picked: File | undefined) => {
     if (!picked) return;
     setSubmitError("");
     if (picked.type && !ACCEPTED_VIDEO.includes(picked.type)) {
@@ -134,7 +136,22 @@ export function AgentPlayers() {
       const { file: _omit, ...rest } = e;
       return rest;
     });
-    setFile(picked);
+    // iOS Telegram WebView often releases the underlying picker blob
+    // before XHR can stream it. Read into memory now so the upload uses
+    // a stable in-process Blob, not a lazy reference into the picker.
+    setIsPreparingFile(true);
+    try {
+      const buffer = await picked.arrayBuffer();
+      const stable = new File([buffer], picked.name, {
+        type: picked.type || "video/mp4",
+        lastModified: picked.lastModified,
+      });
+      setFile(stable);
+    } catch {
+      setFile(picked);
+    } finally {
+      setIsPreparingFile(false);
+    }
   };
 
   const validate = () => {
@@ -153,6 +170,7 @@ export function AgentPlayers() {
   };
 
   const handleAddPlayer = async () => {
+    if (submitInFlight.current) return;
     setSubmitError("");
     if (!validate()) return;
     const tgId = getTelegramUserId();
@@ -161,6 +179,7 @@ export function AgentPlayers() {
       return;
     }
     if (!file) return;
+    submitInFlight.current = true;
     try {
       setIsSubmitting(true);
       setUploadPct(0);
@@ -203,6 +222,7 @@ export function AgentPlayers() {
     } finally {
       setIsSubmitting(false);
       setUploadPct(0);
+      submitInFlight.current = false;
     }
   };
 
@@ -223,8 +243,10 @@ export function AgentPlayers() {
       step={1}
       stepLabelOverride={t("agent.step.players")}
       ctaLabel={ctaLabel}
-      ctaLoading={isSubmitting}
-      ctaDisabled={isSubmitting || (!canAddMore && !canContinue)}
+      ctaLoading={isSubmitting || isPreparingFile}
+      ctaDisabled={
+        isSubmitting || isPreparingFile || (!canAddMore && !canContinue)
+      }
       onCta={handleCta}
     >
       <div className="space-y-5">
@@ -422,8 +444,9 @@ export function AgentPlayers() {
               {!file ? (
                 <button
                   type="button"
+                  disabled={isPreparingFile}
                   onClick={() => fileRef.current?.click()}
-                  className="w-full rounded-2xl border-2 border-dashed border-brand/50 bg-brand/5 p-6 text-center transition-all duration-200 hover:border-brand hover:bg-brand/10 active:scale-[0.99]"
+                  className="w-full rounded-2xl border-2 border-dashed border-brand/50 bg-brand/5 p-6 text-center transition-all duration-200 hover:border-brand hover:bg-brand/10 active:scale-[0.99] disabled:opacity-60"
                 >
                   <div className="flex flex-col items-center gap-3">
                     <div className="h-14 w-14 rounded-2xl bg-brand/15 text-brand flex items-center justify-center">
