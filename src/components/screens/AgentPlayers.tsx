@@ -357,7 +357,7 @@ export function AgentPlayers() {
         ) : null}
 
         {submitError ? (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-center text-sm text-red-700">
+          <p className="break-words rounded-lg bg-red-50 px-3 py-2 text-left text-xs text-red-700 [overflow-wrap:anywhere] sm:text-sm">
             {submitError}
           </p>
         ) : null}

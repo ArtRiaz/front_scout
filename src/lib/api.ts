@@ -188,14 +188,39 @@ export async function createAgentPlayer(
     xhr.responseType = "text";
     xhr.timeout = 15 * 60 * 1000; // 15 minutes — allow slow mobile uploads
 
-    if (xhr.upload && onProgress) {
+    let lastLoaded = 0;
+    let lastTotal = 0;
+    const startedAt = Date.now();
+
+    if (xhr.upload) {
       xhr.upload.onprogress = (evt) => {
         if (evt.lengthComputable && evt.total > 0) {
-          const pct = Math.round((evt.loaded / evt.total) * 100);
-          onProgress(pct);
+          lastLoaded = evt.loaded;
+          lastTotal = evt.total;
+          if (onProgress) {
+            const pct = Math.round((evt.loaded / evt.total) * 100);
+            onProgress(pct);
+          }
         }
       };
+      xhr.upload.onerror = () => {
+        // Surfaced via xhr.onerror below; keep handler so iOS does not
+        // bubble an unhandled error event.
+      };
+      xhr.upload.onabort = () => {
+        // Same.
+      };
     }
+
+    const buildDiag = (label: string) => {
+      const elapsed = Date.now() - startedAt;
+      return (
+        `[upload ${label}] ` +
+        `rs=${xhr.readyState} st=${xhr.status} ` +
+        `sent=${lastLoaded}/${lastTotal || data.file.size}B ` +
+        `elapsed=${elapsed}ms`
+      );
+    };
 
     xhr.onload = () => {
       const status = xhr.status;
@@ -220,14 +245,20 @@ export async function createAgentPlayer(
           typeof body.detail === "string"
             ? body.detail
             : `Create player failed: ${status}`;
-        reject(new Error(detail));
+        reject(new Error(`${detail} ${buildDiag("http_error")}`));
       }
     };
-    xhr.onerror = () => reject(new Error("Network error while uploading video"));
-    xhr.onabort = () => reject(new Error("Upload aborted"));
-    xhr.ontimeout = () => reject(new Error("Upload timed out"));
+    xhr.onerror = () => reject(new Error(`Network error ${buildDiag("error")}`));
+    xhr.onabort = () => reject(new Error(`Upload aborted ${buildDiag("abort")}`));
+    xhr.ontimeout = () =>
+      reject(new Error(`Upload timed out ${buildDiag("timeout")}`));
 
-    xhr.send(formData);
+    try {
+      xhr.send(formData);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      reject(new Error(`xhr.send threw: ${msg} ${buildDiag("send_throw")}`));
+    }
   });
 }
 
