@@ -218,6 +218,12 @@ export function AgentPlayers() {
       } else if (lower.includes("413") || lower.includes("too large")) {
         message = t("video.too_large", { size: MAX_VIDEO_MB });
       }
+      // Always append the raw XHR diagnostic so we can debug iOS WebView
+      // upload aborts directly from the user's screen.
+      const diagMatch = raw.match(/\[upload [^\]]+\][^]*$/);
+      if (diagMatch && !message.includes(diagMatch[0])) {
+        message = `${message}\n${diagMatch[0]}`;
+      }
       setSubmitError(message);
     } finally {
       setIsSubmitting(false);
@@ -357,7 +363,7 @@ export function AgentPlayers() {
         ) : null}
 
         {submitError ? (
-          <p className="break-words rounded-lg bg-red-50 px-3 py-2 text-left text-xs text-red-700 [overflow-wrap:anywhere] sm:text-sm">
+          <p className="whitespace-pre-line break-words rounded-lg bg-red-50 px-3 py-2 text-left text-xs text-red-700 [overflow-wrap:anywhere] sm:text-sm">
             {submitError}
           </p>
         ) : null}
