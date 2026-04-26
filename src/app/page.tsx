@@ -95,6 +95,44 @@ export default function Home() {
 
   useEffect(() => {
     let cancelled = false;
+
+    const isTransientFetchError = (err: unknown): boolean => {
+      const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
+      return (
+        msg.includes("load failed") ||
+        msg.includes("failed to fetch") ||
+        msg.includes("network error") ||
+        msg.includes("networkerror") ||
+        msg.includes("timeout") ||
+        msg.includes("aborted") ||
+        msg.includes("cancelled") ||
+        msg.includes("the operation couldn") // iOS NSURLError prefix
+      );
+    };
+
+    const fetchStatusWithRetry = async (tgId: number) => {
+      // iOS Telegram WebView often fails the first fetch after the app
+      // is resumed from background ("Load failed"). A short retry loop
+      // makes boot resilient without changing UX in the happy path.
+      const delays = [400, 1200, 3000];
+      let lastErr: unknown = null;
+      for (let attempt = 0; attempt <= delays.length; attempt += 1) {
+        if (cancelled) throw new Error("cancelled");
+        try {
+          return await getStatus(tgId);
+        } catch (err) {
+          lastErr = err;
+          if (!isTransientFetchError(err) || attempt === delays.length) throw err;
+          console.warn(
+            `[scout] getStatus attempt ${attempt + 1} failed, retrying:`,
+            err,
+          );
+          await new Promise((r) => setTimeout(r, delays[attempt]));
+        }
+      }
+      throw lastErr ?? new Error("getStatus failed");
+    };
+
     (async () => {
       const tgId = getTelegramUserId();
       if (!tgId) {
@@ -103,7 +141,7 @@ export default function Home() {
       }
       setStatusLoadError(null);
       try {
-        const s = await getStatus(tgId);
+        const s = await fetchStatusWithRetry(tgId);
         if (cancelled) return;
 
         const socialFlow = shouldUseSocialFlow();
@@ -125,7 +163,27 @@ export default function Home() {
           setShowWelcome(false);
         } else if (s.has_agent_registration) {
           try {
-            const p = await getAgentProfile(tgId);
+            const profileDelays = [400, 1200];
+            let p: Awaited<ReturnType<typeof getAgentProfile>> | null = null;
+            let profileErr: unknown = null;
+            for (let attempt = 0; attempt <= profileDelays.length; attempt += 1) {
+              if (cancelled) return;
+              try {
+                p = await getAgentProfile(tgId);
+                profileErr = null;
+                break;
+              } catch (err) {
+                profileErr = err;
+                if (
+                  !isTransientFetchError(err) ||
+                  attempt === profileDelays.length
+                ) {
+                  break;
+                }
+                await new Promise((r) => setTimeout(r, profileDelays[attempt]));
+              }
+            }
+            if (!p) throw profileErr ?? new Error("getAgentProfile failed");
             if (cancelled) return;
             setAgentProfile({
               firstName: p.first_name,
