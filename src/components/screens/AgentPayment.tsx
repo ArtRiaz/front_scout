@@ -1,32 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StepLayout } from "@/components/layout/StepLayout";
 import { ClubBadge } from "@/components/ui/ClubBadge";
 import {
   initiateAgentCheckout,
   getAgentPaymentStatus,
   getAgentProfile,
+  getAgentPrices,
 } from "@/lib/api";
 import { getTelegramUserId, getWebApp } from "@/lib/telegram";
 import { t } from "@/lib/i18n";
 import { useFormStore } from "@/store/useFormStore";
 
-const STANDARD_PRICE = Number(
+const FALLBACK_STANDARD = Number(
   process.env.NEXT_PUBLIC_AGENT_PRICE_STANDARD ?? 80,
 );
-const PRIORITY_PRICE = Number(
+const FALLBACK_PRIORITY = Number(
   process.env.NEXT_PUBLIC_AGENT_PRICE_PRIORITY ?? 150,
 );
-
-const TARIFFS: Array<{
-  key: "standard" | "priority";
-  price: number;
-  labelKey: "agent.pay.tariff.standard" | "agent.pay.tariff.priority";
-}> = [
-  { key: "standard", price: STANDARD_PRICE, labelKey: "agent.pay.tariff.standard" },
-  { key: "priority", price: PRIORITY_PRICE, labelKey: "agent.pay.tariff.priority" },
-];
 
 const AUTO_CLOSE_MS = 2500;
 
@@ -43,12 +35,51 @@ export function AgentPayment() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paid, setPaid] = useState(false);
+  const [prices, setPrices] = useState<{ standard: number; priority: number }>({
+    standard: FALLBACK_STANDARD,
+    priority: FALLBACK_PRIORITY,
+  });
+  const [pricesLoaded, setPricesLoaded] = useState(false);
 
   const playersCount = agentProfile?.playersAdded ?? 0;
-  const unitPrice = TARIFFS.find((tar) => tar.key === submissionType)?.price ?? 80;
+  const tariffs = useMemo(
+    () =>
+      [
+        {
+          key: "standard",
+          price: prices.standard,
+          labelKey: "agent.pay.tariff.standard",
+        },
+        {
+          key: "priority",
+          price: prices.priority,
+          labelKey: "agent.pay.tariff.priority",
+        },
+      ] as const,
+    [prices],
+  );
+  const unitPrice =
+    tariffs.find((tar) => tar.key === submissionType)?.price ?? prices.standard;
   const totalStars = unitPrice * playersCount;
 
-  // Auto-close + reset to fresh batch after success
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const p = await getAgentPrices();
+        if (cancelled) return;
+        setPrices({ standard: p.standard, priority: p.priority });
+      } catch {
+        // keep fallback values
+      } finally {
+        if (!cancelled) setPricesLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (!paid) return;
     const tgId = getTelegramUserId();
@@ -74,6 +105,30 @@ export function AgentPayment() {
     }, AUTO_CLOSE_MS);
     return () => clearTimeout(timer);
   }, [paid, setAgentProfile, setAgentSubStep, setAgentCheckout]);
+
+  const handleManualClose = () => {
+    const tgId = getTelegramUserId();
+    (async () => {
+      try {
+        if (tgId) {
+          const profile = await getAgentProfile(tgId);
+          setAgentProfile({
+            firstName: profile.first_name,
+            lastName: profile.last_name,
+            country: profile.country,
+            agentRole: profile.agent_role,
+            playersAdded: profile.players_count,
+            paidPlayersCount: profile.paid_players_count ?? 0,
+          });
+        }
+      } catch {
+        // ignore
+      }
+      setAgentSubStep("players");
+      setAgentCheckout(null);
+      getWebApp()?.close?.();
+    })();
+  };
 
   const handlePay = async () => {
     setError("");
@@ -166,6 +221,13 @@ export function AgentPayment() {
           <p className="mt-4 text-xs text-text-tertiary">
             {t("agent.pay.auto_close")}
           </p>
+          <button
+            type="button"
+            onClick={handleManualClose}
+            className="mt-6 inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-brand-light active:scale-[0.98]"
+          >
+            {t("agent.pay.success_close")}
+          </button>
         </div>
       </div>
     );
@@ -177,7 +239,7 @@ export function AgentPayment() {
       stepLabelOverride={t("agent.step.payment")}
       ctaLabel={t("agent.pay.cta", { amount: totalStars })}
       ctaLoading={isSubmitting}
-      ctaDisabled={playersCount < 2}
+      ctaDisabled={playersCount < 2 || !pricesLoaded}
       onCta={handlePay}
     >
       <div className="space-y-5">
@@ -190,7 +252,7 @@ export function AgentPayment() {
         </div>
 
         <div className="space-y-3">
-          {TARIFFS.map((tariff) => {
+          {tariffs.map((tariff) => {
             const selected = submissionType === tariff.key;
             return (
               <button

@@ -99,6 +99,18 @@ const translations = {
   "agent.pay.type": { en: "Submission type", uk: "Тип подачі" },
   "agent.pay.total": { en: "Total", uk: "Всього" },
   "agent.pay.cta": { en: "Confirm and pay — {amount} Stars", uk: "Підтвердити та оплатити — {amount} Stars" },
+  "agent.players.batch_title": {
+    en: "Players in this submission",
+    uk: "Гравці у цій подачі",
+  },
+  "agent.players.free_agent": {
+    en: "Free agent",
+    uk: "Вільний агент",
+  },
+  "agent.players.remove": {
+    en: "Remove player",
+    uk: "Видалити гравця",
+  },
   "agent.players.previous_title": {
     en: "{count} players already submitted",
     uk: "{count} гравців уже подано",
@@ -118,6 +130,10 @@ const translations = {
   "agent.pay.auto_close": {
     en: "Closing automatically…",
     uk: "Автоматичне закриття…",
+  },
+  "agent.pay.success_close": {
+    en: "Close",
+    uk: "Закрити",
   },
 
   // ── Trust card ──

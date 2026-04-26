@@ -237,6 +237,40 @@ export async function getAgentPaymentStatus(
   );
 }
 
+export async function getAgentPrices() {
+  return request<{ standard: number; priority: number; currency: string }>(
+    "/api/agent/prices",
+  );
+}
+
+export interface AgentBatchPlayer {
+  id: string;
+  first_name: string;
+  last_name: string;
+  position: string;
+  height_cm: number;
+  weight_kg: number;
+  country: string;
+  current_club: string | null;
+  free_agent: boolean;
+  video_file_url: string | null;
+  created_at: string;
+}
+
+export async function listAgentBatchPlayers(telegramUserId: number) {
+  return request<AgentBatchPlayer[]>(`/api/agent/players/${telegramUserId}`);
+}
+
+export async function deleteAgentBatchPlayer(
+  telegramUserId: number,
+  playerId: string,
+) {
+  return request<{ ok: boolean; players_count: number }>(
+    `/api/agent/players/${telegramUserId}/${playerId}`,
+    { method: "DELETE" },
+  );
+}
+
 export async function initiateAgentCheckout(data: {
   telegram_user_id: number;
   submission_type: "standard" | "priority";
