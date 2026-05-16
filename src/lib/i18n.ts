@@ -310,6 +310,13 @@ const translations = {
     uk: "Вашу заявку офіційно надіслано до FC Real Pharma. З обраними гравцями зв'яжуться щодо наступних кроків.",
   },
   "done.close": { en: "You can close this window now.", uk: "Тепер можна закрити це вікно." },
+  // UK-only hint after the social submission: the scout's «Готовий до
+  // розгляду» tick triggers a DM via the bot, which only works if the
+  // player has actually opened a chat with the bot first.
+  "done.bot_hint_uk": {
+    en: "",
+    uk: "Щоб отримати запрошення на перегляд, відкрийте чат із ботом @real_farma_scout_bot і натисніть /start.",
+  },
 
   // ── Misc ──
   "misc.open_from_tg": { en: "Please open this mini app from Telegram.", uk: "Відкрийте цей міні-додаток з Telegram." },

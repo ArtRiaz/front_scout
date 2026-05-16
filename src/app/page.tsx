@@ -16,6 +16,10 @@ import { AgentPlayers } from "@/components/screens/AgentPlayers";
 import { AgentPayment } from "@/components/screens/AgentPayment";
 
 function FlowCompleteScreen() {
+  // UK/RU scouts trigger a viewing-invite DM from Notion; that DM only
+  // reaches players who have already started the bot. The English flow
+  // doesn't use this surface, so the hint is intentionally empty there.
+  const botHint = t("done.bot_hint_uk");
   return (
     <div className="flex flex-col items-center justify-center min-h-[100dvh] px-5">
       <div className="step-enter flex flex-col items-center text-center">
@@ -40,6 +44,11 @@ function FlowCompleteScreen() {
         <p className="text-base text-text-secondary max-w-xs leading-relaxed">
           {t("done.desc")}
         </p>
+        {botHint && (
+          <p className="text-sm text-text-secondary max-w-sm leading-relaxed mt-4 rounded-xl border border-border bg-surface px-4 py-3">
+            {botHint}
+          </p>
+        )}
         <p className="text-sm text-text-tertiary mt-6">
           {t("done.close")}
         </p>
