@@ -316,6 +316,32 @@ export async function getAgentPrices() {
   );
 }
 
+export async function getAgentConfig() {
+  return request<{
+    payment_enabled: boolean;
+    min_players: number;
+    max_players: number;
+    standard: number;
+    priority: number;
+    currency: string;
+  }>("/api/agent/config");
+}
+
+export async function submitAgentFree(data: {
+  telegram_user_id: number;
+  submission_type: "standard" | "priority";
+}) {
+  return request<{
+    payment_id: string;
+    status: string;
+    players_count: number;
+    submission_type: string;
+  }>("/api/agent/checkout/submit", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 export interface AgentBatchPlayer {
   id: string;
   first_name: string;

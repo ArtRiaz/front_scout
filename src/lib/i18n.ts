@@ -119,6 +119,11 @@ const translations = {
   "agent.pay.type": { en: "Submission type", uk: "Тип подачі" },
   "agent.pay.total": { en: "Total", uk: "Всього" },
   "agent.pay.cta": { en: "Confirm and pay — {amount} Stars", uk: "Підтвердити та оплатити — {amount} Stars" },
+  "agent.pay.cta_free": { en: "Submit package", uk: "Надіслати пакет" },
+  "agent.pay.free_note": {
+    en: "Stars payment is temporarily disabled. The package will be submitted to the club for free.",
+    uk: "Оплата Stars тимчасово вимкнена. Пакет буде надіслано клубу безкоштовно.",
+  },
   "agent.players.batch_title": {
     en: "Players in this submission",
     uk: "Гравці у цій подачі",

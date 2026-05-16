@@ -8,6 +8,8 @@ import {
   getAgentPaymentStatus,
   getAgentProfile,
   getAgentPrices,
+  getAgentConfig,
+  submitAgentFree,
 } from "@/lib/api";
 import { getTelegramUserId, getWebApp } from "@/lib/telegram";
 import { t } from "@/lib/i18n";
@@ -40,6 +42,8 @@ export function AgentPayment() {
     priority: FALLBACK_PRIORITY,
   });
   const [pricesLoaded, setPricesLoaded] = useState(false);
+  const [paymentEnabled, setPaymentEnabled] = useState(true);
+  const [configLoaded, setConfigLoaded] = useState(false);
 
   const playersCount = agentProfile?.playersAdded ?? 0;
   const tariffs = useMemo(
@@ -65,14 +69,26 @@ export function AgentPayment() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      // Single config endpoint returns prices + payment_enabled flag.
       try {
-        const p = await getAgentPrices();
+        const cfg = await getAgentConfig();
         if (cancelled) return;
-        setPrices({ standard: p.standard, priority: p.priority });
+        setPrices({ standard: cfg.standard, priority: cfg.priority });
+        setPaymentEnabled(cfg.payment_enabled);
       } catch {
-        // keep fallback values
+        // Fallback to legacy /prices if /config is not yet deployed.
+        try {
+          const p = await getAgentPrices();
+          if (cancelled) return;
+          setPrices({ standard: p.standard, priority: p.priority });
+        } catch {
+          // keep fallback values
+        }
       } finally {
-        if (!cancelled) setPricesLoaded(true);
+        if (!cancelled) {
+          setPricesLoaded(true);
+          setConfigLoaded(true);
+        }
       }
     })();
     return () => {
@@ -130,6 +146,33 @@ export function AgentPayment() {
       setAgentCheckout(null);
       getWebApp()?.close?.();
     })();
+  };
+
+  const handleSubmitFree = async () => {
+    setError("");
+    const tgId = getTelegramUserId();
+    if (!tgId) {
+      setError(t("misc.open_from_tg"));
+      return;
+    }
+    try {
+      setIsSubmitting(true);
+      const res = await submitAgentFree({
+        telegram_user_id: tgId,
+        submission_type: submissionType,
+      });
+      setAgentCheckout({
+        submissionType,
+        unitPrice: 0,
+        totalStars: 0,
+      });
+      void res;
+      setPaid(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("misc.something_wrong"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePay = async () => {
@@ -239,10 +282,14 @@ export function AgentPayment() {
     <StepLayout
       step={2}
       stepLabelOverride={t("agent.step.payment")}
-      ctaLabel={t("agent.pay.cta", { amount: totalStars })}
+      ctaLabel={
+        paymentEnabled
+          ? t("agent.pay.cta", { amount: totalStars })
+          : t("agent.pay.cta_free")
+      }
       ctaLoading={isSubmitting}
-      ctaDisabled={playersCount < 2 || !pricesLoaded}
-      onCta={handlePay}
+      ctaDisabled={playersCount < 2 || !pricesLoaded || !configLoaded}
+      onCta={paymentEnabled ? handlePay : handleSubmitFree}
     >
       <div className="space-y-5">
         <ClubBadge />
@@ -252,6 +299,12 @@ export function AgentPayment() {
             {t("agent.pay.subtitle")}
           </p>
         </div>
+
+        {!paymentEnabled && configLoaded ? (
+          <div className="rounded-xl border border-brand/30 bg-brand/5 px-4 py-3 text-sm text-text-primary">
+            {t("agent.pay.free_note")}
+          </div>
+        ) : null}
 
         <div className="space-y-3">
           {tariffs.map((tariff) => {
@@ -309,10 +362,12 @@ export function AgentPayment() {
                 : t("agent.pay.tariff.standard")}
             </span>
           </div>
-          <div className="mt-3 border-t border-border pt-3 flex justify-between">
-            <span className="font-semibold text-text-primary">{t("agent.pay.total")}</span>
-            <span className="font-bold text-brand">{totalStars} Stars</span>
-          </div>
+          {paymentEnabled ? (
+            <div className="mt-3 border-t border-border pt-3 flex justify-between">
+              <span className="font-semibold text-text-primary">{t("agent.pay.total")}</span>
+              <span className="font-bold text-brand">{totalStars} Stars</span>
+            </div>
+          ) : null}
         </div>
 
         {error ? (
