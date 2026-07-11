@@ -15,7 +15,9 @@ import { t } from "@/lib/i18n";
 import { PENALTY_CONFIG, type ShotResult } from "@/lib/penaltyConfig";
 import { getBestScore, saveBestScore } from "@/lib/gameStorage";
 
-type Phase = "intro" | "ready" | "shooting" | "result" | "over";
+type Phase = "loading" | "intro" | "ready" | "shooting" | "result" | "over";
+
+const GAME_ASSETS = ["/game/pitch-bg.jpg", "/game/keeper.png"];
 
 interface PenaltyGameProps {
   onExit: () => void;
@@ -114,7 +116,7 @@ export function PenaltyGame({ onExit }: PenaltyGameProps) {
   const swipePath = useRef<{ x: number; y: number }[]>([]);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("loading");
   const [shotIndex, setShotIndex] = useState(0);
   const [goals, setGoals] = useState(0);
   const [result, setResult] = useState<ShotResult | null>(null);
@@ -133,8 +135,36 @@ export function PenaltyGame({ onExit }: PenaltyGameProps) {
   const [resetting, setResetting] = useState(true);
   const [aimLine, setAimLine] = useState<{ x: number; y: number } | null>(null);
 
+  // Preload the pitch + keeper before revealing the intro, so the first shot
+  // never renders against blank/half-loaded art inside the Telegram WebView.
   useEffect(() => {
     setBest(getBestScore());
+
+    let cancelled = false;
+    let loaded = 0;
+    const reveal = () => {
+      if (!cancelled) setPhase("intro");
+    };
+    // Safety net: don't trap the user on the loader if an asset stalls.
+    const safety = setTimeout(reveal, 4000);
+    const onOne = () => {
+      loaded += 1;
+      if (loaded >= GAME_ASSETS.length) {
+        clearTimeout(safety);
+        reveal();
+      }
+    };
+    GAME_ASSETS.forEach((src) => {
+      const img = new window.Image();
+      img.onload = onOne;
+      img.onerror = onOne;
+      img.src = src;
+    });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(safety);
+    };
   }, []);
 
   const clearTimers = useCallback(() => {
@@ -289,7 +319,7 @@ export function PenaltyGame({ onExit }: PenaltyGameProps) {
         style={{ touchAction: "none" }}
       >
         <Image
-          src="/game/pitch-bg.png"
+          src="/game/pitch-bg.jpg"
           alt=""
           fill
           priority
@@ -352,6 +382,7 @@ export function PenaltyGame({ onExit }: PenaltyGameProps) {
             alt=""
             width={300}
             height={300}
+            priority
             className="h-auto w-full drop-shadow-[0_6px_10px_rgba(0,0,0,0.45)]"
           />
         </div>
@@ -430,6 +461,19 @@ export function PenaltyGame({ onExit }: PenaltyGameProps) {
           </div>
         )}
       </div>
+
+      {/* Preloader */}
+      {phase === "loading" && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-brand px-6 text-center">
+          <div className="step-enter flex flex-col items-center">
+            <div className="mb-6 text-5xl animate-bounce">⚽</div>
+            <div className="h-9 w-9 animate-spin rounded-full border-2 border-white/25 border-t-club-red" />
+            <p className="mt-5 text-sm font-medium text-white/80">
+              {t("game.loading")}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Intro overlay */}
       {phase === "intro" && (

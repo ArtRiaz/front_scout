@@ -348,6 +348,7 @@ const translations = {
   // ── Penalty mini-game ──
   "game.open": { en: "⚽ Penalty challenge", uk: "⚽ Пенальті-виклик" },
   "game.title": { en: "Penalty Shootout", uk: "Серія пенальті" },
+  "game.loading": { en: "Warming up…", uk: "Розминка…" },
   "game.intro_desc": {
     en: "Swipe the ball toward the goal — direction and power matter, and a curved swipe bends the shot around the keeper. Beat him 5 times!",
     uk: "Свайпни по м'ячу в бік воріт — важливі напрямок і сила, а дугою можна закрутити м'яч повз воротаря. Обіграй його 5 разів!",
