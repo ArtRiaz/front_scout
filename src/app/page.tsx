@@ -14,6 +14,7 @@ import { AgentRegistration } from "@/components/screens/AgentRegistration";
 import { AgentMiniSummary } from "@/components/screens/AgentMiniSummary";
 import { AgentPlayers } from "@/components/screens/AgentPlayers";
 import { AgentPayment } from "@/components/screens/AgentPayment";
+import { PenaltyGame } from "@/components/screens/PenaltyGame";
 
 function FlowCompleteScreen() {
   // UK/RU scouts trigger a viewing-invite DM from Notion; that DM only
@@ -90,6 +91,8 @@ export default function Home() {
     setFlowKind,
     setAgentSubStep,
     setAgentProfile,
+    appView,
+    setAppView,
   } = useFormStore();
   const [hydrated, setHydrated] = useState(false);
   const [statusLoadError, setStatusLoadError] = useState<string | null>(null);
@@ -188,6 +191,15 @@ export default function Home() {
     const webapp = getWebApp();
     if (!webapp) return;
 
+    if (appView === "game") {
+      webapp.BackButton.show();
+      const backToFlow = () => setAppView("flow");
+      webapp.BackButton.onClick(backToFlow);
+      return () => {
+        webapp.BackButton.offClick(backToFlow);
+      };
+    }
+
     if (applicationComplete) {
       webapp.BackButton.hide();
       return;
@@ -235,6 +247,8 @@ export default function Home() {
     setAgentSubStep,
     setFlowKind,
     setAgentProfile,
+    appView,
+    setAppView,
   ]);
 
   if (!hydrated) {
@@ -273,6 +287,10 @@ export default function Home() {
     );
   }
 
+  if (appView === "game") {
+    return <PenaltyGame onExit={() => setAppView("flow")} />;
+  }
+
   if (applicationComplete) {
     return <FlowCompleteScreen />;
   }
@@ -290,6 +308,7 @@ export default function Home() {
           setAgentProfile(null);
           setShowWelcome(false);
         }}
+        onStartGame={() => setAppView("game")}
       />
     );
   }

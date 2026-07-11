@@ -3,6 +3,8 @@ import type { FormData, Step } from "@/types";
 
 export type FlowKind = "player" | "agent";
 export type AgentSubStep = "register" | "summary" | "players" | "payment";
+/** Top-level surface: the main onboarding flow or the penalty mini-game. */
+export type AppView = "flow" | "game";
 
 export interface AgentProfileSnapshot {
   firstName: string;
@@ -22,6 +24,8 @@ export interface AgentCheckoutSnapshot {
 
 interface FormStore {
   step: Step;
+  /** Which top-level surface is shown (main flow vs mini-game). */
+  appView: AppView;
   form: FormData;
   stagedVideoId: string | null;
   stagedVideoName: string;
@@ -34,6 +38,7 @@ interface FormStore {
   agentProfile: AgentProfileSnapshot | null;
   agentCheckout: AgentCheckoutSnapshot | null;
   setStep: (step: Step) => void;
+  setAppView: (v: AppView) => void;
   updateForm: (field: keyof FormData, value: string | boolean) => void;
   setStagedVideo: (videoId: string | null, videoName?: string) => void;
   setSubmitting: (v: boolean) => void;
@@ -64,6 +69,7 @@ const initialForm: FormData = {
 
 export const useFormStore = create<FormStore>((set) => ({
   step: 0,
+  appView: "flow",
   form: { ...initialForm },
   stagedVideoId: null,
   stagedVideoName: "",
@@ -75,6 +81,8 @@ export const useFormStore = create<FormStore>((set) => ({
   agentCheckout: null,
 
   setStep: (step) => set({ step }),
+
+  setAppView: (v) => set({ appView: v }),
 
   updateForm: (field, value) =>
     set((state) => ({

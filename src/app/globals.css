@@ -77,4 +77,20 @@
       transform: translateY(0);
     }
   }
+
+  /* Penalty ball flight: bows through a mid control point so a curled
+     swipe visibly bends the trajectory. Waypoints are set via CSS vars. */
+  @keyframes penaltyFlight {
+    0% {
+      transform: translate(-50%, -50%) translate(0, 0) scale(1);
+    }
+    55% {
+      transform: translate(-50%, -50%)
+        translate(var(--mx), var(--my)) scale(var(--ms));
+    }
+    100% {
+      transform: translate(-50%, -50%)
+        translate(var(--fx), var(--fy)) scale(var(--fs));
+    }
+  }
 }

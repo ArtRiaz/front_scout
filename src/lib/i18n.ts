@@ -344,6 +344,27 @@ const translations = {
   "foot.right": { en: "Right", uk: "Права" },
   "foot.left": { en: "Left", uk: "Ліва" },
   "foot.both": { en: "Both", uk: "Обидві" },
+
+  // ── Penalty mini-game ──
+  "game.open": { en: "⚽ Penalty challenge", uk: "⚽ Пенальті-виклик" },
+  "game.title": { en: "Penalty Shootout", uk: "Серія пенальті" },
+  "game.intro_desc": {
+    en: "Swipe the ball toward the goal — direction and power matter, and a curved swipe bends the shot around the keeper. Beat him 5 times!",
+    uk: "Свайпни по м'ячу в бік воріт — важливі напрямок і сила, а дугою можна закрутити м'яч повз воротаря. Обіграй його 5 разів!",
+  },
+  "game.best": { en: "Best", uk: "Рекорд" },
+  "game.start": { en: "Start shooting", uk: "Почати серію" },
+  "game.swipe_hint": { en: "Swipe the ball to shoot", uk: "Свайпни по м'ячу" },
+  "game.shot_of": { en: "Shot {current} / {total}", uk: "Удар {current} / {total}" },
+  "game.goals": { en: "Goals", uk: "Голи" },
+  "game.result_goal": { en: "GOAL!", uk: "ГОЛ!" },
+  "game.result_save": { en: "SAVED!", uk: "СЕЙВ!" },
+  "game.result_miss": { en: "MISS!", uk: "МИМО!" },
+  "game.over_title": { en: "Full time", uk: "Матч завершено" },
+  "game.over_score": { en: "You scored {goals} of {total}", uk: "Забито {goals} з {total}" },
+  "game.new_record": { en: "🏆 New record!", uk: "🏆 Новий рекорд!" },
+  "game.replay": { en: "Play again", uk: "Ще раз" },
+  "game.exit": { en: "Back", uk: "Назад" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

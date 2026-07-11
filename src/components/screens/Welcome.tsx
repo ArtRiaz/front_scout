@@ -4,14 +4,18 @@ import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { TrustCard } from "@/components/ui/TrustCard";
 import { getLocale, t } from "@/lib/i18n";
+import { getTelegramUserId } from "@/lib/telegram";
+import { isGameEnabledForUser } from "@/lib/penaltyConfig";
 
 interface WelcomeProps {
   onStartPlayer: () => void;
   onStartAgent: () => void;
+  onStartGame: () => void;
 }
 
-export function Welcome({ onStartPlayer, onStartAgent }: WelcomeProps) {
+export function Welcome({ onStartPlayer, onStartAgent, onStartGame }: WelcomeProps) {
   const isEnglish = getLocale() === "en";
+  const showGame = isGameEnabledForUser(getTelegramUserId());
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -53,9 +57,9 @@ export function Welcome({ onStartPlayer, onStartAgent }: WelcomeProps) {
         </p>
       </main>
 
-      <div className="mt-auto px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-1">
+      <div className="mt-auto flex flex-col gap-3 px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-1">
         {isEnglish ? (
-          <div className="flex flex-col gap-3">
+          <>
             <Button onClick={onStartPlayer} className="welcome-cta">
               {t("welcome.cta")}
             </Button>
@@ -66,11 +70,20 @@ export function Welcome({ onStartPlayer, onStartAgent }: WelcomeProps) {
             >
               {t("welcome.cta_agent")}
             </Button>
-          </div>
+          </>
         ) : (
           <Button onClick={onStartPlayer} className="welcome-cta">
             {t("welcome.cta")}
           </Button>
+        )}
+        {showGame && (
+          <button
+            type="button"
+            onClick={onStartGame}
+            className="flex h-12 w-full items-center justify-center rounded-xl border border-club-red/30 bg-club-red-subtle font-semibold text-club-red transition-colors hover:bg-club-red/10"
+          >
+            {t("game.open")}
+          </button>
         )}
       </div>
     </div>
